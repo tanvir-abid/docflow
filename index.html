@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocFlowEditor — Documentation</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="src/editor.css">
+<style>
+/* ─── Design Tokens ──────────────────────────────────────────────── */
+:root {
+  /* Light palette */
+  --bg:          #F6F5F2;
+  --surface:     #FFFFFF;
+  --surface-2:   #F0EEE9;
+  --ink:         #18181B;
+  --ink-2:       #3F3F46;
+  --muted:       #71717A;
+  --primary:     #4F46E5;
+  --primary-soft:#EEF2FF;
+  --primary-ink: #FFFFFF;
+  --accent:      #06B6D4;
+  --accent-soft: #ECFEFF;
+  --success:     #10B981;
+  --warn:        #F59E0B;
+  --border:      #E4E4E7;
+  --border-soft: #F1F0ED;
+  --code-bg:     #111117;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.06);
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+}
+[data-bs-theme="dark"] {
+  --bg:          #0F0F13;
+  --surface:     #18181D;
+  --surface-2:   #22222A;
+  --ink:         #F4F4F5;
+  --ink-2:       #D4D4D8;
+  --muted:       #71717A;
+  --primary:     #818CF8;
+  --primary-soft:#1E1B4B;
+  --primary-ink: #0D0C1E;
+  --accent:      #22D3EE;
+  --accent-soft: #083344;
+  --success:     #34D399;
+  --warn:        #FBB F24;
+  --border:      #27272A;
+  --border-soft: #1F1F24;
+  --code-bg:     #0C0C10;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3);
+}
+
+/* ─── Base ────────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  transition: background .22s ease, color .22s ease;
+}
+h1, h2, h3, .display-serif { font-family: 'Instrument Serif', Georgia, serif; }
+code, pre, kbd, .mono { font-family: 'Geist Mono', 'JetBrains Mono', monospace; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { font-weight: 600; }
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+/* ─── Navbar ──────────────────────────────────────────────────────── */
+.site-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+  height: 60px;
+}
+.site-nav .inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.18rem;
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: -.01em;
+  text-decoration: none;
+}
+.brand .logo-mark {
+  width: 30px; height: 30px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: white;
+  font-size: .85rem;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 600;
+}
+.brand:hover { text-decoration: none; }
+.badge-ver {
+  font-family: 'Geist Mono', monospace;
+  font-size: .68rem;
+  font-weight: 500;
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: .15rem .45rem;
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.nav-links {
+  display: flex;
+  gap: .25rem;
+  margin-left: .5rem;
+}
+.nav-link-item {
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: .3rem .65rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: color .15s, background .15s;
+}
+.nav-link-item:hover { color: var(--ink); background: var(--surface-2); text-decoration: none; }
+.nav-actions { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.icon-btn:hover { color: var(--ink); background: var(--surface-2); border-color: var(--border); }
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .mobile-menu-btn { display: inline-flex; }
+}
+
+/* ─── Hero ────────────────────────────────────────────────────────── */
+.hero {
+  padding: 7rem 0 4rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 8%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: 5%;
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .8rem;
+  font-weight: 500;
+  font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.hero-eyebrow .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(.8); }
+}
+.hero-title {
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 400;
+  letter-spacing: -.03em;
+  line-height: 1.12;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--primary);
+}
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 48rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: 2rem;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: .28rem .75rem;
+  color: var(--ink-2);
+}
+.chip .bi { color: var(--primary); font-size: .85rem; }
+
+/* ─── Install snippet ─────────────────────────────────────────────── */
+.install-strip {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.snippet-card {
+  flex: 1;
+  min-width: 280px;
+  background: var(--code-bg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.snippet-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem .9rem .4rem;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.snippet-label .dot-row { display: flex; gap: .35rem; }
+.snippet-label .dot-row span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,.18);
+}
+.snippet-label .dot-row span:nth-child(1) { background: #FF5F57; }
+.snippet-label .dot-row span:nth-child(2) { background: #FEBC2E; }
+.snippet-label .dot-row span:nth-child(3) { background: #28C840; }
+.snippet-filename {
+  font-size: .72rem;
+  font-family: 'Geist Mono', monospace;
+  color: rgba(255,255,255,.35);
+  letter-spacing: .03em;
+}
+.snippet-card .code-inner {
+  padding: .9rem 1.1rem;
+  position: relative;
+}
+.snippet-card pre { margin: 0; background: transparent !important; }
+.snippet-card code { font-size: .82rem; line-height: 1.55; }
+
+/* ─── Editor live demo in hero ────────────────────────────────────── */
+.hero-editor-wrapper {
+  margin-top: 3rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+.hero-editor-wrapper .editor-note {
+  padding: .55rem 1rem;
+  font-size: .8rem;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.hero-editor-wrapper .editor-note .bi { color: var(--primary); }
+
+/* ─── Page layout ─────────────────────────────────────────────────── */
+.page-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.docs-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 3rem;
+  padding-top: 2.5rem;
+  align-items: start;
+}
+@media (max-width: 991px) {
+  .docs-layout { grid-template-columns: 1fr; }
+  .docs-sidebar { display: none; }
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────── */
+.docs-sidebar {
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  padding-bottom: 2rem;
+}
+.docs-sidebar::-webkit-scrollbar { width: 3px; }
+.docs-sidebar::-webkit-scrollbar-track { background: transparent; }
+.docs-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.sidenav-group-label {
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+  padding: 1.25rem .5rem .35rem;
+}
+.sidenav-group-label:first-child { padding-top: 0; }
+.sidenav-link {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .875rem;
+  color: var(--muted);
+  padding: .32rem .5rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .12s, background .12s, border-color .12s;
+}
+.sidenav-link:hover { color: var(--ink); background: var(--surface); text-decoration: none; }
+.sidenav-link.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-left-color: var(--primary);
+  font-weight: 600;
+}
+.sidenav-link .bi { font-size: .8rem; opacity: .7; }
+
+/* ─── Main content ────────────────────────────────────────────────── */
+.doc-main { min-width: 0; padding-bottom: 5rem; }
+
+.doc-section {
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+}
+.doc-section + .doc-section { border-top: 1px solid var(--border-soft); }
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-bottom: .75rem;
+}
+.section-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: var(--primary);
+  font-size: .95rem;
+  flex-shrink: 0;
+}
+.section-header h2 {
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: -.02em;
+  margin: 0;
+  color: var(--ink);
+}
+.section-lead {
+  color: var(--muted);
+  font-size: .95rem;
+  max-width: 52rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+}
+.section-lead code { color: var(--primary); }
+
+/* ─── Feature cards (overview) ───────────────────────────────────── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: .75rem;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.feature-card:hover { border-color: color-mix(in srgb, var(--primary) 35%, transparent); box-shadow: var(--shadow-sm); }
+.feature-card .icon { font-size: 1.3rem; color: var(--primary); display: block; margin-bottom: .6rem; }
+.feature-card h6 { font-size: .92rem; font-weight: 600; margin-bottom: .3rem; color: var(--ink); }
+.feature-card p { font-size: .82rem; color: var(--muted); margin: 0; line-height: 1.5; }
+
+/* ─── Code blocks ─────────────────────────────────────────────────── */
+.code-wrap {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(255,255,255,.04);
+  background: var(--code-bg);
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem .9rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.code-lang {
+  font-family: 'Geist Mono', monospace;
+  font-size: .7rem;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.copy-btn {
+  font-family: 'Geist Mono', monospace;
+  font-size: .72rem;
+  padding: .2rem .55rem;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.5);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.copy-btn:hover { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); }
+.copy-btn.copied { background: var(--success); border-color: transparent; color: #fff; }
+.code-wrap pre { margin: 0; padding: 1rem 1.1rem; max-height: 500px; background: transparent !important; }
+.code-wrap code { font-size: .83rem; line-height: 1.6; }
+
+/* ─── Inline code ─────────────────────────────────────────────────── */
+:not(pre) > code {
+  font-family: 'Geist Mono', monospace;
+  font-size: .83em;
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: .1rem .38rem;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+/* ─── Callout ─────────────────────────────────────────────────────── */
+.callout {
+  border-radius: var(--radius-md);
+  padding: .85rem 1.1rem;
+  font-size: .9rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+}
+.callout .bi { font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+.callout-info { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); color: var(--ink-2); }
+.callout-info .bi, .callout-info strong { color: var(--accent); }
+.callout-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: var(--ink-2); }
+.callout-warn .bi, .callout-warn strong { color: #D97706; }
+[data-bs-theme="dark"] .callout-warn { background: #1C1506; border-color: #4B3600; }
+
+/* ─── Tables ──────────────────────────────────────────────────────── */
+.data-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+  margin-bottom: 1.25rem;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+}
+.data-table th {
+  background: var(--surface-2);
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  padding: .65rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.data-table td {
+  padding: .7rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--ink-2);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface-2); }
+.data-table td code { font-size: .82em; }
+
+/* ─── Tab nav ─────────────────────────────────────────────────────── */
+.code-tabs { margin-bottom: 0; }
+.code-tabs .nav-tabs { border-bottom: 1px solid var(--border); display: flex; gap: .25rem; padding: 0; background: var(--surface); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.code-tabs .nav-tabs .nav-link {
+  font-size: .83rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: .55rem 1rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  margin-bottom: -1px;
+}
+.code-tabs .nav-tabs .nav-link.active { color: var(--primary); border-bottom-color: var(--primary); }
+.code-tabs .tab-content { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); overflow: hidden; }
+.code-tabs .tab-pane .code-wrap { border-radius: 0; margin: 0; border: none; }
+
+/* ─── KBD shortcuts ───────────────────────────────────────────────── */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: .5rem;
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .55rem .85rem;
+  font-size: .88rem;
+  color: var(--ink-2);
+}
+.shortcut-row kbd {
+  font-family: 'Geist Mono', monospace;
+  font-size: .78rem;
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: .1rem .45rem;
+  display: inline-block;
+}
+
+/* ─── Tool Explorer ───────────────────────────────────────────────── */
+.tool-explorer-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.tool-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 260px;
+}
+.tool-search-wrap .bi-search {
+  position: absolute;
+  left: .7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: .85rem;
+  pointer-events: none;
+}
+.tool-search {
+  width: 100%;
+  padding: .45rem .75rem .45rem 2.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: .875rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.tool-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent); outline: none; }
+.tool-search::placeholder { color: var(--muted); }
+.cat-chips { display: flex; gap: .4rem; flex-wrap: wrap; }
+.cat-chip {
+  font-size: .8rem;
+  font-weight: 500;
+  padding: .3rem .75rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  user-select: none;
+}
+.cat-chip:hover { color: var(--ink); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.cat-chip.active { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+
+/* Tool cards grid */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: .6rem;
+}
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  transition: border-color .15s, box-shadow .15s, transform .12s;
+  cursor: default;
+}
+.tool-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.tool-card[data-hidden="true"] { display: none; }
+.tool-card-name {
+  font-family: 'Geist Mono', monospace;
+  font-size: .83rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.tool-card-desc {
+  font-size: .82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.tool-card-badge {
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-radius: 4px;
+  padding: .12rem .45rem;
+  display: inline-block;
+  margin-top: .15rem;
+  align-self: flex-start;
+}
+.badge-text     { background: #EDE9FE; color: #6D28D9; }
+.badge-paragraph{ background: #ECFDF5; color: #065F46; }
+.badge-insert   { background: #EFF6FF; color: #1D4ED8; }
+.badge-utility  { background: #F3F4F6; color: #374151; }
+[data-bs-theme="dark"] .badge-text      { background: #2E1065; color: #C4B5FD; }
+[data-bs-theme="dark"] .badge-paragraph { background: #052E16; color: #6EE7B7; }
+[data-bs-theme="dark"] .badge-insert    { background: #0C1E3E; color: #93C5FD; }
+[data-bs-theme="dark"] .badge-utility   { background: #18181B; color: #9CA3AF; }
+.no-tools-msg {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--muted);
+  font-size: .9rem;
+  display: none;
+}
+.tool-count {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-left: auto;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ─── Tool tester ─────────────────────────────────────────────────── */
+.tool-tester {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.tool-tester-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.tool-tester-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+}
+.tester-badge {
+  font-size: .7rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: .15rem .5rem;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  margin-left: auto;
+}
+.tool-tester-body {
+  padding: 1.25rem;
+}
+.tool-tester-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+.tester-action-btn {
+  font-size: .82rem;
+  font-weight: 500;
+  padding: .38rem .85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.tester-action-btn:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--primary) 30%, transparent); color: var(--primary); }
+.tester-action-btn .bi { font-size: .85rem; }
+.tester-output {
+  margin-top: 1rem;
+  padding: .75rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Geist Mono', monospace;
+  font-size: .82rem;
+  color: var(--muted);
+  min-height: 2.8rem;
+  word-break: break-all;
+  display: none;
+}
+.tester-output.visible { display: block; }
+.tester-output .out-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; display: block; margin-bottom: .35rem; }
+.tester-output .out-val { color: var(--ink); }
+
+/* ─── Theming demo ────────────────────────────────────────────────── */
+.theme-swatch-row {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.theme-swatch {
+  flex: 1;
+  min-width: 160px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.theme-swatch .swatch-top {
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  padding: .5rem .75rem;
+  font-size: .75rem;
+  font-weight: 600;
+  font-family: 'Geist Mono', monospace;
+}
+.theme-swatch .swatch-top.light { background: #F6F5F2; color: #18181B; }
+.theme-swatch .swatch-top.dark  { background: #0F0F13; color: #F4F4F5; }
+.theme-swatch .swatch-bottom {
+  padding: .55rem .75rem;
+  background: var(--surface);
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* ─── API method pills ────────────────────────────────────────────── */
+.api-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.api-card-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+  flex-wrap: wrap;
+}
+.api-card-row:last-child { border-bottom: none; }
+.api-card-row:hover { background: var(--surface-2); }
+.api-method {
+  font-family: 'Geist Mono', monospace;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+}
+.api-returns {
+  font-family: 'Geist Mono', monospace;
+  font-size: .78rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.api-desc {
+  font-size: .86rem;
+  color: var(--muted);
+  flex: 1;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
+.site-footer .inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ─── Mobile offcanvas ────────────────────────────────────────────── */
+.offcanvas-header { border-bottom: 1px solid var(--border); }
+.offcanvas.offcanvas-start { background: var(--surface); }
+
+/* ─── Utilities ───────────────────────────────────────────────────── */
+.mb-section { margin-bottom: 1.5rem; }
+.text-primary-themed { color: var(--primary); }
+.text-accent-themed  { color: var(--accent); }
+.divider { border: none; border-top: 1px solid var(--border-soft); margin: 2rem 0; }
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ────────────────────────────────────────────────────── -->
+<header class="site-nav" role="banner">
+  <div class="inner">
+    <a class="brand" href="#overview">
+      <span class="logo-mark" aria-hidden="true">Df</span>
+      DocFlowEditor
+      <span class="badge-ver">v1.0.0</span>
+    </a>
+    <nav class="nav-links" aria-label="Documentation sections">
+      <a href="#overview"      class="nav-link-item">Overview</a>
+      <a href="#installation"  class="nav-link-item">Install</a>
+      <a href="#tools"         class="nav-link-item">Tools</a>
+      <a href="#public-api"    class="nav-link-item">API</a>
+      <a href="#full-demo"     class="nav-link-item">Demo</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="#" class="icon-btn" title="View on GitHub" aria-label="GitHub"><i class="bi bi-github"></i></a>
+      <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle light/dark theme">
+        <i class="bi bi-moon-stars" id="themeIcon"></i>
+      </button>
+      <button class="icon-btn mobile-menu-btn" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-label="Open menu">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Mobile nav offcanvas ──────────────────────────────────────── -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileNav" aria-labelledby="mobileNavLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="mobileNavLabel">DocFlowEditor</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" id="mobileNavBody"></div>
+</div>
+
+<!-- ── Hero ──────────────────────────────────────────────────────── -->
+<section class="hero" aria-label="Introduction">
+  <div class="page-wrap">
+    <div class="hero-eyebrow">
+      <span class="dot" aria-hidden="true"></span>
+      Drop-in · No dependencies · ES Modules
+    </div>
+    <h1 class="hero-title">
+      Rich text editing<br>that just <em>drops in.</em>
+    </h1>
+    <p class="hero-sub">
+      DocFlowEditor is a modular, dependency-free rich text editor for the web.
+      One stylesheet, one ES module — every toolbar tool is independent. Include,
+      reorder, or replace any of the 25+ built-in tools with a single config option.
+    </p>
+
+    <div class="hero-chips" role="list">
+      <span class="chip" role="listitem"><i class="bi bi-puzzle-fill"></i> Fully modular</span>
+      <span class="chip" role="listitem"><i class="bi bi-moon-stars-fill"></i> Light &amp; dark themes</span>
+      <span class="chip" role="listitem"><i class="bi bi-box-arrow-up-right"></i> No dependencies</span>
+      <span class="chip" role="listitem"><i class="bi bi-distribute-vertical"></i> Split-mount mode</span>
+      <span class="chip" role="listitem"><i class="bi bi-keyboard"></i> Keyboard shortcuts</span>
+    </div>
+
+    <div class="install-strip">
+      <div class="snippet-card">
+        <div class="snippet-label">
+          <span class="dot-row" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="snippet-filename">your-page.html · stylesheet</span>
+        </div>
+        <div class="code-inner">
+          <div class="code-wrap" style="margin:0;border:none;background:transparent;">
+            <pre style="padding:0;"><code class="language-markup">&lt;link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/editor.css"&gt;</code></pre>
+          </div>
+          <button class="copy-btn" style="position:absolute;top:.6rem;right:.6rem;">Copy</button>
+        </div>
+      </div>
+      <div class="snippet-card">
+        <div class="snippet-label">
+          <span class="dot-row" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="snippet-filename">your-page.html · script</span>
+        </div>
+        <div class="code-inner">
+          <div class="code-wrap" style="margin:0;border:none;background:transparent;">
+            <pre style="padding:0;"><code class="language-markup">&lt;script type="module"&gt;
+  import { DocFlowEditor } from
+    'https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/editor.js';
+  new DocFlowEditor('#my-editor');
+&lt;/script&gt;</code></pre>
+          </div>
+          <button class="copy-btn" style="position:absolute;top:.6rem;right:.6rem;">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live editor -->
+    <div class="hero-editor-wrapper mt-4">
+      <div class="editor-note">
+        <i class="bi bi-cursor-text"></i>
+        <span>Live editor — try it below. Every toolbar button is a self-contained module.</span>
+      </div>
+      <div id="my-editor"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Docs layout ────────────────────────────────────────────────── -->
+<div class="page-wrap">
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <nav id="sidebarNav"></nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="doc-main" id="doc-main">
+
+      <!-- OVERVIEW -->
+      <section id="overview" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-info-circle-fill"></i></span>
+          <h2>Overview</h2>
+        </div>
+        <p class="section-lead">
+          DocFlowEditor mounts onto any <code>&lt;div&gt;</code> and gives you a complete toolbar,
+          content area, and status bar — no build step, no npm, no bundler. It ships with 25+
+          independent tools across four categories, supports custom tools, and has zero runtime
+          dependencies.
+        </p>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <i class="bi bi-puzzle-fill icon"></i>
+            <h6>Modular</h6>
+            <p>Every tool is an independent module. Include only what your users need.</p>
+          </div>
+          <div class="feature-card">
+            <i class="bi bi-distribute-vertical icon"></i>
+            <h6>Split mounting</h6>
+            <p>Mount toolbar and content in separate containers — handy for sticky toolbars.</p>
+          </div>
+          <div class="feature-card">
+            <i class="bi bi-moon-stars-fill icon"></i>
+            <h6>Themeable</h6>
+            <p>Light, dark, or OS-synced — switched instantly at runtime via <code>setTheme()</code>.</p>
+          </div>
+          <div class="feature-card">
+            <i class="bi bi-file-earmark-text icon"></i>
+            <h6>Document-oriented</h6>
+            <p>Page margin presets, borders, multi-column layout — beyond a simple textarea.</p>
+          </div>
+          <div class="feature-card">
+            <i class="bi bi-broadcast icon"></i>
+            <h6>Events &amp; API</h6>
+            <p>React to changes via callbacks or DOM events; control content via the public API.</p>
+          </div>
+          <div class="feature-card">
+            <i class="bi bi-wrench-adjustable icon"></i>
+            <h6>Extensible</h6>
+            <p>Register custom tools with <code>registerTool()</code> using a simple interface.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSTALLATION -->
+      <section id="installation" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-download"></i></span>
+          <h2>Installation</h2>
+        </div>
+        <p class="section-lead">
+          Served from GitHub via jsDelivr — no build step, no npm. <code>editor.js</code> is an
+          ES module that resolves its own tool imports relative to its CDN URL automatically.
+        </p>
+        <div class="callout callout-warn">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <div>
+            <strong>Replace placeholders:</strong> swap <code>USERNAME/REPO@v1.0.0</code> with
+            your actual GitHub path and release tag once published. Pin a tag — never a branch —
+            so the CDN link stays stable.
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">html</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-markup">&lt;!-- 1. Stylesheet --&gt;
+&lt;link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/editor.css"&gt;
+
+&lt;!-- 2. ES module --&gt;
+&lt;script type="module"&gt;
+  import { DocFlowEditor } from
+    'https://cdn.jsdelivr.net/gh/USERNAME/REPO@v1.0.0/editor.js';
+&lt;/script&gt;</code></pre>
+        </div>
+        <p class="small" style="color:var(--muted);">
+          Requires native ES module support — all current evergreen browsers. IE is not supported.
+        </p>
+      </section>
+
+      <!-- QUICK START -->
+      <section id="quick-start" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-rocket-takeoff-fill"></i></span>
+          <h2>Quick Start</h2>
+        </div>
+        <p class="section-lead">
+          The minimal setup: point DocFlowEditor at an empty container element. It replaces
+          it with a toolbar, content area, and status bar in one call.
+        </p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">html + js</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-markup">&lt;!-- The container --&gt;
+&lt;div id="my-editor"&gt;&lt;/div&gt;
+
+&lt;script type="module"&gt;
+  import { DocFlowEditor } from './editor.js';
+
+  const editor = new DocFlowEditor('#my-editor');
+&lt;/script&gt;</code></pre>
+        </div>
+        <p class="small" style="color:var(--muted);">
+          The first argument accepts a CSS selector string or a DOM element reference directly.
+        </p>
+      </section>
+
+      <!-- SPLIT MODE -->
+      <section id="split-mode" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-layout-split"></i></span>
+          <h2>Split Mode</h2>
+        </div>
+        <p class="section-lead">
+          Mount the toolbar and content area in separate containers — useful for sticky toolbars,
+          full-page layouts, or when you need the editor areas in different DOM positions.
+        </p>
+        <div class="code-tabs mb-section">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#splitArray" role="tab">Array form</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#splitObject" role="tab">Object form</button>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="splitArray" role="tabpanel">
+              <div class="code-wrap">
+                <div class="code-header">
+                  <span class="code-lang">javascript</span>
+                  <button class="copy-btn">Copy</button>
+                </div>
+                <pre><code class="language-javascript">import { DocFlowEditor } from './editor.js';
+
+// Pass targets as a two-element array: [toolbar, content]
+const editor = new DocFlowEditor(['#toolbar-slot', '#content-slot']);</code></pre>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="splitObject" role="tabpanel">
+              <div class="code-wrap">
+                <div class="code-header">
+                  <span class="code-lang">javascript</span>
+                  <button class="copy-btn">Copy</button>
+                </div>
+                <pre><code class="language-javascript">import { DocFlowEditor } from './editor.js';
+
+// Or use an object form for clarity
+const editor = new DocFlowEditor({
+  toolbar: '#toolbar-slot',
+  content: '#content-slot',
+});</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <i class="bi bi-info-circle-fill"></i>
+          <div>In split mode, <code>destroy()</code> restores each container's original HTML independently.</div>
+        </div>
+      </section>
+
+      <!-- CONFIGURATION -->
+      <section id="configuration" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-sliders"></i></span>
+          <h2>Configuration Reference</h2>
+        </div>
+        <p class="section-lead">
+          Pass a config object as the second constructor argument to customize the editor.
+          All options have sensible defaults so you can start with an empty object.
+        </p>
+        <div class="code-wrap mb-section">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">new DocFlowEditor('#my-editor', {
+  tools: null,                  // null = all built-ins; or an array — see Toolbar Customization
+  placeholder: 'Start writing…',
+  minHeight: 297,               // mm — maps to --rte-min-height CSS variable (A4 by default)
+  onChange: (html) => {},       // fires on every edit
+  initialContent: '',           // seed HTML for the editor on mount
+  theme: 'light',               // 'light' | 'dark' | 'auto' (follows OS)
+  showStatusBar: true,          // false hides the word-count footer
+});</code></pre>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" aria-label="Configuration options">
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>tools</code></td>
+                <td class="mono" style="font-size:.8rem;">string[] | null</td>
+                <td class="mono" style="font-size:.8rem;">null</td>
+                <td>Subset &amp; order of toolbar tools. <code>null</code> loads all built-ins.</td>
+              </tr>
+              <tr>
+                <td><code>placeholder</code></td>
+                <td class="mono" style="font-size:.8rem;">string</td>
+                <td class="mono" style="font-size:.8rem;">'Start writing…'</td>
+                <td>Shown when the content area is empty.</td>
+              </tr>
+              <tr>
+                <td><code>minHeight</code></td>
+                <td class="mono" style="font-size:.8rem;">number</td>
+                <td class="mono" style="font-size:.8rem;">297</td>
+                <td>In millimetres. Defaults to A4 page height. Sets <code>--rte-min-height</code>.</td>
+              </tr>
+              <tr>
+                <td><code>onChange</code></td>
+                <td class="mono" style="font-size:.8rem;">fn(html)</td>
+                <td class="mono" style="font-size:.8rem;">null</td>
+                <td>Callback fired on every keystroke or edit. Receives the current HTML string.</td>
+              </tr>
+              <tr>
+                <td><code>initialContent</code></td>
+                <td class="mono" style="font-size:.8rem;">string</td>
+                <td class="mono" style="font-size:.8rem;">''</td>
+                <td>HTML to pre-populate the editor. Falls back to the container's existing markup.</td>
+              </tr>
+              <tr>
+                <td><code>theme</code></td>
+                <td class="mono" style="font-size:.8rem;">'light' | 'dark' | 'auto'</td>
+                <td class="mono" style="font-size:.8rem;">'light'</td>
+                <td><code>'auto'</code> syncs with the OS <code>prefers-color-scheme</code> media query.</td>
+              </tr>
+              <tr>
+                <td><code>showStatusBar</code></td>
+                <td class="mono" style="font-size:.8rem;">boolean</td>
+                <td class="mono" style="font-size:.8rem;">true</td>
+                <td>Toggles the word and character count footer.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TOOLS -->
+      <section id="tools" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-collection-fill"></i></span>
+          <h2>Built-in Tools</h2>
+        </div>
+        <p class="section-lead">
+          25+ tools across four categories. The string in each card is the exact name to use
+          in your <code>tools</code> config array.
+        </p>
+
+        <!-- Tool tester -->
+        <div class="tool-tester">
+          <div class="tool-tester-header">
+            <i class="bi bi-play-circle-fill" style="color:var(--accent);"></i>
+            <h3>Tool Tester</h3>
+            <span class="tester-badge">Live</span>
+          </div>
+          <div class="tool-tester-body">
+            <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem;">
+              Click a button below to interact with the live editor above the docs:
+            </p>
+            <div class="tool-tester-actions">
+              <button class="tester-action-btn" data-action="getHTML"><i class="bi bi-code-slash"></i>getHTML()</button>
+              <button class="tester-action-btn" data-action="getText"><i class="bi bi-body-text"></i>getText()</button>
+              <button class="tester-action-btn" data-action="wordCount"><i class="bi bi-hash"></i>Word count</button>
+              <button class="tester-action-btn" data-action="setThemeDark"><i class="bi bi-moon-fill"></i>Set dark theme</button>
+              <button class="tester-action-btn" data-action="setThemeLight"><i class="bi bi-sun-fill"></i>Set light theme</button>
+              <button class="tester-action-btn" data-action="focus"><i class="bi bi-cursor-text"></i>focus()</button>
+              <button class="tester-action-btn" data-action="setHTML"><i class="bi bi-pencil"></i>setHTML()</button>
+              <button class="tester-action-btn" data-action="clear"><i class="bi bi-trash3"></i>clear()</button>
+            </div>
+            <div class="tester-output" id="testerOutput">
+              <span class="out-label">Output</span>
+              <span class="out-val" id="testerOutputVal"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search + filter -->
+        <div class="tool-explorer-header">
+          <div class="tool-search-wrap">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="text" id="toolSearch" class="tool-search" placeholder="Search tools…" aria-label="Search tools">
+          </div>
+          <div class="cat-chips" role="group" aria-label="Filter by category">
+            <span class="cat-chip active" data-filter="all" tabindex="0" role="button" aria-pressed="true">All</span>
+            <span class="cat-chip" data-filter="text" tabindex="0" role="button" aria-pressed="false">Text</span>
+            <span class="cat-chip" data-filter="paragraph" tabindex="0" role="button" aria-pressed="false">Paragraph</span>
+            <span class="cat-chip" data-filter="insert" tabindex="0" role="button" aria-pressed="false">Insert</span>
+            <span class="cat-chip" data-filter="utility" tabindex="0" role="button" aria-pressed="false">Utility</span>
+          </div>
+          <span class="tool-count" id="toolCount" aria-live="polite"></span>
+        </div>
+
+        <!-- Tool cards grid -->
+        <div class="tool-grid" id="toolGrid" role="list" aria-label="Available tools">
+          <!-- Text tools -->
+          <div class="tool-card" data-category="text" data-name="undoRedo undo redo" role="listitem">
+            <span class="tool-card-name">undoRedo</span>
+            <span class="tool-card-desc">Undo and redo actions (also <kbd>⌘/Ctrl+Z</kbd>)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="bold" role="listitem">
+            <span class="tool-card-name">bold</span>
+            <span class="tool-card-desc">Bold formatting (<kbd>⌘/Ctrl+B</kbd>)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="italic" role="listitem">
+            <span class="tool-card-name">italic</span>
+            <span class="tool-card-desc">Italic formatting (<kbd>⌘/Ctrl+I</kbd>)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="underline" role="listitem">
+            <span class="tool-card-name">underline</span>
+            <span class="tool-card-desc">Underline formatting (<kbd>⌘/Ctrl+U</kbd>)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="strikethrough" role="listitem">
+            <span class="tool-card-name">strikethrough</span>
+            <span class="tool-card-desc">Strikethrough text formatting</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="inlineCode code" role="listitem">
+            <span class="tool-card-name">inlineCode</span>
+            <span class="tool-card-desc">Inline code span (also via backtick <kbd>`</kbd>)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="textColor color" role="listitem">
+            <span class="tool-card-name">textColor</span>
+            <span class="tool-card-desc">Text color picker</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="bgColor background color" role="listitem">
+            <span class="tool-card-name">bgColor</span>
+            <span class="tool-card-desc">Background / highlight color picker</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="highlight" role="listitem">
+            <span class="tool-card-name">highlight</span>
+            <span class="tool-card-desc">Quick highlight color picker</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="fontSize" role="listitem">
+            <span class="tool-card-name">fontSize</span>
+            <span class="tool-card-desc">Font size control dropdown</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="fontFamily font" role="listitem">
+            <span class="tool-card-name">fontFamily</span>
+            <span class="tool-card-desc">Font family selector</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="script superscript subscript" role="listitem">
+            <span class="tool-card-name">script</span>
+            <span class="tool-card-desc">Superscript and subscript toggle</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="lineHeight spacing" role="listitem">
+            <span class="tool-card-name">lineHeight</span>
+            <span class="tool-card-desc">Line spacing control (1.0 – 3.0)</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+          <div class="tool-card" data-category="text" data-name="indent outdent" role="listitem">
+            <span class="tool-card-name">indent</span>
+            <span class="tool-card-desc">Indent and outdent paragraph</span>
+            <span class="tool-card-badge badge-text">Text</span>
+          </div>
+
+          <!-- Paragraph tools -->
+          <div class="tool-card" data-category="paragraph" data-name="heading h1 h2 styles" role="listitem">
+            <span class="tool-card-name">heading</span>
+            <span class="tool-card-desc">H1–H6 and paragraph style picker</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="blockquote quote" role="listitem">
+            <span class="tool-card-name">blockquote</span>
+            <span class="tool-card-desc">Blockquote formatting</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="alignment align left right center justify" role="listitem">
+            <span class="tool-card-name">alignment</span>
+            <span class="tool-card-desc">Left / center / right / justify alignment</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="orderedList numbered list" role="listitem">
+            <span class="tool-card-name">orderedList</span>
+            <span class="tool-card-desc">Numbered list</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="unorderedList bullet list" role="listitem">
+            <span class="tool-card-name">unorderedList</span>
+            <span class="tool-card-desc">Bulleted (unordered) list</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="checklist checkbox todo task" role="listitem">
+            <span class="tool-card-name">checklist</span>
+            <span class="tool-card-desc">Checkbox / to-do list</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+          <div class="tool-card" data-category="paragraph" data-name="columns layout multi-column" role="listitem">
+            <span class="tool-card-name">columns</span>
+            <span class="tool-card-desc">Multi-column paragraph layout</span>
+            <span class="tool-card-badge badge-paragraph">Paragraph</span>
+          </div>
+
+          <!-- Insert tools -->
+          <div class="tool-card" data-category="insert" data-name="link hyperlink url" role="listitem">
+            <span class="tool-card-name">link</span>
+            <span class="tool-card-desc">Insert or edit hyperlinks (<kbd>⌘/Ctrl+K</kbd>)</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="horizontalRule divider hr separator" role="listitem">
+            <span class="tool-card-name">horizontalRule</span>
+            <span class="tool-card-desc">Horizontal divider line</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="codeBlock fenced code" role="listitem">
+            <span class="tool-card-name">codeBlock</span>
+            <span class="tool-card-desc">Fenced code block with language label</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="table grid" role="listitem">
+            <span class="tool-card-name">table</span>
+            <span class="tool-card-desc">Insert table with full editing panel</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="image picture photo" role="listitem">
+            <span class="tool-card-name">image</span>
+            <span class="tool-card-desc">Insert image by URL or upload</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="specialChars symbols" role="listitem">
+            <span class="tool-card-name">specialChars</span>
+            <span class="tool-card-desc">Special character / symbol picker</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+          <div class="tool-card" data-category="insert" data-name="emojiPicker emoji" role="listitem">
+            <span class="tool-card-name">emojiPicker</span>
+            <span class="tool-card-desc">Full emoji picker panel</span>
+            <span class="tool-card-badge badge-insert">Insert</span>
+          </div>
+
+          <!-- Utility tools -->
+          <div class="tool-card" data-category="utility" data-name="clearFormatting remove strip" role="listitem">
+            <span class="tool-card-name">clearFormatting</span>
+            <span class="tool-card-desc">Strips all inline formatting from selection</span>
+            <span class="tool-card-badge badge-utility">Utility</span>
+          </div>
+          <div class="tool-card" data-category="utility" data-name="findReplace search replace" role="listitem">
+            <span class="tool-card-name">findReplace</span>
+            <span class="tool-card-desc">Find &amp; replace panel with case-sensitive option</span>
+            <span class="tool-card-badge badge-utility">Utility</span>
+          </div>
+          <div class="tool-card" data-category="utility" data-name="clipboard paste text" role="listitem">
+            <span class="tool-card-name">clipboard</span>
+            <span class="tool-card-desc">Clipboard helpers — paste-as-plain-text, etc.</span>
+            <span class="tool-card-badge badge-utility">Utility</span>
+          </div>
+          <div class="tool-card" data-category="utility" data-name="dropCap drop cap letter" role="listitem">
+            <span class="tool-card-name">dropCap</span>
+            <span class="tool-card-desc">Drop-cap styling on the first letter</span>
+            <span class="tool-card-badge badge-utility">Utility</span>
+          </div>
+          <div class="tool-card" data-category="utility" data-name="marginPresets margins page layout" role="listitem">
+            <span class="tool-card-name">marginPresets</span>
+            <span class="tool-card-desc">Page margin presets: Slim, Narrow, Normal, Moderate</span>
+            <span class="tool-card-badge badge-utility">Utility</span>
+          </div>
+
+          <div class="no-tools-msg" id="noToolsMsg">No tools matched "<span id="noToolsTerm"></span>"</div>
+        </div>
+
+        <p class="small mt-3" style="color:var(--muted);">
+          Toolbar dividers are auto-inserted after <code>undoRedo</code>, <code>fontFamily</code>,
+          <code>highlight</code>, <code>heading</code>, <code>columns</code>, <code>checklist</code>,
+          <code>codeBlock</code>, <code>table</code>, and <code>image</code> when present and not last.
+        </p>
+      </section>
+
+      <!-- TOOLBAR CUSTOMIZATION -->
+      <section id="toolbar-customization" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-ui-checks"></i></span>
+          <h2>Toolbar Customization</h2>
+        </div>
+        <p class="section-lead">
+          Pass <code>tools</code> as an explicit array. Order in the array is the order tools
+          appear in the toolbar. Unrecognized names are silently skipped. To trim or reorder,
+          just change the array — there's no separate exclude list.
+        </p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">const editor = new DocFlowEditor('#my-editor', {
+  tools: [
+    'undoRedo',
+    'bold', 'italic', 'underline',
+    'heading', 'alignment',
+    'orderedList', 'unorderedList',
+    'link', 'image', 'table',
+    'clearFormatting',
+  ],
+});</code></pre>
+        </div>
+      </section>
+
+      <!-- CUSTOM TOOLS -->
+      <section id="custom-tools" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-magic"></i></span>
+          <h2>Registering a Custom Tool</h2>
+        </div>
+        <p class="section-lead">
+          A tool module is a plain JavaScript object with three keys: <code>name</code>,
+          <code>createButton()</code>, and <code>execute()</code>. Register it before
+          constructing the editor so it's included on first render.
+        </p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">const insertDateTool = {
+  name: 'insertDate',             // unique name — used in the tools array
+
+  createButton(editor) {          // required — returns the toolbar HTMLElement
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '📅';
+    btn.title = "Insert today's date";
+    btn.addEventListener('click', () => insertDateTool.execute(editor));
+    return btn;
+  },
+
+  execute(editor) {               // required — runs the action
+    editor.contentArea.focus();
+    document.execCommand('insertText', false, new Date().toLocaleDateString());
+    editor.emitChange();
+  },
+
+  updateState(btnEl) {            // optional — called on selection change
+    // Toggle an active class based on selection state, if relevant
+  },
+};
+
+// Register, then construct
+const editor = new DocFlowEditor('#my-editor', {
+  tools: ['undoRedo', 'bold', 'insertDate'],
+});
+editor.registerTool(insertDateTool);</code></pre>
+        </div>
+        <div class="callout callout-info">
+          <i class="bi bi-info-circle-fill"></i>
+          <div>
+            If you register a tool <em>after</em> the editor has already mounted, call
+            <code>editor._buildTools(); editor._buildUI();</code> to rebuild the toolbar.
+          </div>
+        </div>
+      </section>
+
+      <!-- PUBLIC API -->
+      <section id="public-api" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-braces"></i></span>
+          <h2>Public API</h2>
+        </div>
+        <p class="section-lead">
+          All methods are available on the editor instance returned by <code>new DocFlowEditor()</code>.
+        </p>
+        <div class="api-card mb-section">
+          <div class="api-card-row">
+            <span class="api-method">getHTML()</span>
+            <span class="api-returns">→ string</span>
+            <span class="api-desc">Returns the current content as an HTML string.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">setHTML(html)</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Replaces all content; re-wires any tables in the new HTML.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">getText()</span>
+            <span class="api-returns">→ string</span>
+            <span class="api-desc">Returns plain-text content (no HTML tags).</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">clear()</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Empties the content area completely.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">focus()</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Programmatically focuses the content area.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">destroy()</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Tears down the editor and restores the original DOM node(s).</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">setTheme(theme)</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Switch between <code>'light'</code> and <code>'dark'</code> at runtime, without remounting.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">registerTool(module)</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Add a custom tool to the registry.</span>
+          </div>
+          <div class="api-card-row">
+            <span class="api-method">syncToolbarState()</span>
+            <span class="api-returns">→ void</span>
+            <span class="api-desc">Manually re-sync toolbar active/inactive states with the current selection.</span>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">// Quick reference
+editor.setHTML('&lt;p&gt;Hello &lt;b&gt;world&lt;/b&gt;&lt;/p&gt;');
+console.log(editor.getHTML());
+console.log(editor.getText());
+editor.setTheme('dark');
+editor.clear();
+editor.focus();
+editor.destroy();</code></pre>
+        </div>
+      </section>
+
+      <!-- EVENTS -->
+      <section id="events" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-broadcast"></i></span>
+          <h2>Listening for Changes</h2>
+        </div>
+        <p class="section-lead">
+          Two equivalent ways to react to edits — use whichever fits your architecture:
+        </p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">// 1. Config callback — fires on every keystroke/edit
+const editor = new DocFlowEditor('#my-editor', {
+  onChange: (html) => console.log('changed:', html),
+});
+
+// 2. DOM event — bubbles, so you can listen on a parent element too
+editor.root.addEventListener('rte:change', (e) => {
+  console.log('changed:', e.detail.html);
+});</code></pre>
+        </div>
+      </section>
+
+      <!-- KEYBOARD SHORTCUTS -->
+      <section id="shortcuts" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-keyboard-fill"></i></span>
+          <h2>Keyboard Shortcuts</h2>
+        </div>
+        <p class="section-lead">
+          Active only while focus is inside the content area, and only if the corresponding tool
+          is included in the active <code>tools</code> list.
+        </p>
+        <div class="shortcut-grid">
+          <div class="shortcut-row">
+            <span>Bold</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>B</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Italic</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>I</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Underline</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>U</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Link</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>K</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Undo</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>Z</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Redo</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span>Inline code</span>
+            <span><kbd>`</kbd> backtick</span>
+          </div>
+          <div class="shortcut-row">
+            <span>Find &amp; replace</span>
+            <span><kbd>⌘/Ctrl</kbd> <kbd>H</kbd></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- THEMING -->
+      <section id="theming" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-palette-fill"></i></span>
+          <h2>Theming</h2>
+        </div>
+        <p class="section-lead">
+          The editor container gets <code>class="rte-editor"</code>,
+          <code>data-theme="light|dark"</code>, and a <code>--rte-min-height</code> CSS variable.
+          Override the CSS variables in <code>editor.css</code> to style against these hooks.
+        </p>
+
+        <div class="theme-swatch-row">
+          <div class="theme-swatch">
+            <div class="swatch-top light">Light mode</div>
+            <div class="swatch-bottom">Default. Clean white surfaces, indigo primary.</div>
+          </div>
+          <div class="theme-swatch">
+            <div class="swatch-top dark">Dark mode</div>
+            <div class="swatch-bottom">Deep neutral backgrounds, lifted primary tones.</div>
+          </div>
+        </div>
+
+        <div class="code-wrap mb-section">
+          <div class="code-header">
+            <span class="code-lang">css — customise in editor.css</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-css">/* Target dark theme specifically */
+.rte-editor[data-theme="dark"] {
+  --paper: #1e1e1e;
+  --ink:   #e8e8e8;
+}
+
+/* Respect reduced-motion for animated toolbar entries */
+@media (prefers-reduced-motion: reduce) {
+  .rte-toolbar * { animation: none !important; }
+}</code></pre>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript — runtime toggling</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">// Follow OS preference on init
+new DocFlowEditor('#my-editor', { theme: 'auto' });
+
+// Toggle at runtime — no remount needed
+themeToggleBtn.addEventListener('click', () => {
+  const next = editor.config.theme === 'dark' ? 'light' : 'dark';
+  editor.setTheme(next);
+  // Also update your page theme if needed:
+  document.documentElement.setAttribute('data-bs-theme', next);
+});</code></pre>
+        </div>
+        <div class="callout callout-info mt-3">
+          <i class="bi bi-lightbulb-fill"></i>
+          <div>
+            <strong>Tip:</strong> always call <code>editor.setTheme()</code> alongside your
+            page-level theme toggle. This keeps the editor in sync without remounting it.
+          </div>
+        </div>
+      </section>
+
+      <!-- FULL DEMO -->
+      <section id="full-demo" class="doc-section">
+        <div class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
+          <h2>Full Demo</h2>
+        </div>
+        <p class="section-lead">
+          Split-target mounting, curated toolbar, registered custom tool, seeded content,
+          runtime theme toggling, change events, and the full public API — all in one example.
+        </p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-lang">javascript</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <pre><code class="language-javascript">import { DocFlowEditor } from './editor.js';
+
+// 1. Define a custom tool
+const insertDateTool = {
+  name: 'insertDate',
+  createButton(editor) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '📅';
+    btn.title = "Insert today's date";
+    btn.addEventListener('click', () => insertDateTool.execute(editor));
+    return btn;
+  },
+  execute(editor) {
+    editor.contentArea.focus();
+    document.execCommand('insertText', false, new Date().toLocaleDateString());
+    editor.emitChange();
+  },
+};
+
+// 2. Construct in split mode with a curated toolbar
+const editor = new DocFlowEditor(
+  { toolbar: '#toolbar-slot', content: '#content-slot' },
+  {
+    tools: [
+      'undoRedo',
+      'bold', 'italic', 'underline', 'strikethrough',
+      'heading', 'alignment', 'orderedList', 'unorderedList',
+      'link', 'image', 'table', 'insertDate',
+      'clearFormatting', 'findReplace',
+    ],
+    placeholder: 'Write your document…',
+    minHeight: 297,
+    theme: 'auto',
+    showStatusBar: true,
+    initialContent: '&lt;h1&gt;Demo Document&lt;/h1&gt;&lt;p&gt;Start editing…&lt;/p&gt;',
+    onChange: (html) => console.log('autosave payload:', html),
+  }
+);
+
+editor.registerTool(insertDateTool);
+
+// 3. Events and public API
+editor.root.addEventListener('rte:change', (e) => {
+  // e.detail.html === editor.getHTML()
+});
+
+// ✅ Correct: sync BOTH the page theme AND editor theme together
+themeToggleBtn.addEventListener('click', () => {
+  const next = editor.config.theme === 'dark' ? 'light' : 'dark';
+  editor.setTheme(next);                                // updates editor
+  document.documentElement.setAttribute('data-bs-theme', next); // updates page
+});
+
+saveBtn.addEventListener('click',  () => console.log(editor.getHTML()));
+clearBtn.addEventListener('click', () => editor.clear());</code></pre>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────── -->
+<footer class="site-footer" role="contentinfo">
+  <div class="inner">
+    <span>DocFlowEditor Documentation · v1.0.0</span>
+    <span>Built with Bootstrap 5 · No tracking, no ads</span>
+  </div>
+</footer>
+
+<!-- ── Scripts ────────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+<script>
+/* ─── Sidebar nav build ─────────────────────────────────────────── */
+const NAV_SECTIONS = [
+  { group: 'Getting started', icon: 'bi-house', items: [
+    ['overview',     'bi-info-circle',      'Overview'],
+    ['installation', 'bi-download',         'Installation'],
+    ['quick-start',  'bi-rocket-takeoff',   'Quick Start'],
+  ]},
+  { group: 'Setup', icon: 'bi-gear', items: [
+    ['split-mode',    'bi-layout-split',  'Split Mode'],
+    ['configuration', 'bi-sliders',       'Configuration'],
+  ]},
+  { group: 'Features', icon: 'bi-stars', items: [
+    ['tools',               'bi-collection',  'Built-in Tools'],
+    ['toolbar-customization','bi-ui-checks',  'Toolbar Customization'],
+    ['custom-tools',         'bi-magic',      'Custom Tools'],
+  ]},
+  { group: 'Reference', icon: 'bi-book', items: [
+    ['public-api', 'bi-braces',        'Public API'],
+    ['events',     'bi-broadcast',     'Events'],
+    ['shortcuts',  'bi-keyboard',      'Shortcuts'],
+    ['theming',    'bi-palette',       'Theming'],
+  ]},
+  { group: 'Examples', icon: 'bi-code-square', items: [
+    ['full-demo', 'bi-stars', 'Full Demo'],
+  ]},
+];
+
+function buildNav(container, isOffcanvas) {
+  NAV_SECTIONS.forEach(({ group, items }) => {
+    const label = document.createElement('div');
+    label.className = 'sidenav-group-label';
+    label.textContent = group;
+    container.appendChild(label);
+
+    items.forEach(([id, icon, text]) => {
+      const a = document.createElement('a');
+      a.href = '#' + id;
+      a.className = 'sidenav-link';
+      a.innerHTML = `<i class="bi ${icon}"></i>${text}`;
+      if (isOffcanvas) {
+        a.addEventListener('click', () => {
+          const oc = bootstrap.Offcanvas.getInstance(document.getElementById('mobileNav'));
+          if (oc) oc.hide();
+        });
+      }
+      container.appendChild(a);
+    });
+  });
+}
+
+buildNav(document.getElementById('sidebarNav'), false);
+buildNav(document.getElementById('mobileNavBody'), true);
+
+/* ─── Scroll-spy active link ────────────────────────────────────── */
+const allSectionEls = NAV_SECTIONS
+  .flatMap(g => g.items)
+  .map(([id]) => document.getElementById(id))
+  .filter(Boolean);
+
+function syncActive() {
+  let current = allSectionEls[0];
+  for (const el of allSectionEls) {
+    if (el.getBoundingClientRect().top - 90 <= 0) current = el;
+  }
+  document.querySelectorAll('#sidebarNav .sidenav-link').forEach(l => {
+    const active = l.getAttribute('href') === '#' + current?.id;
+    l.classList.toggle('active', active);
+    l.setAttribute('aria-current', active ? 'page' : 'false');
+  });
+}
+document.addEventListener('scroll', syncActive, { passive: true });
+syncActive();
+
+/* ─── Theme toggle — syncs both page + editor theme ────────────── */
+const htmlEl = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon   = document.getElementById('themeIcon');
+
+themeToggle.addEventListener('click', () => {
+  const isDark = htmlEl.getAttribute('data-bs-theme') === 'dark';
+  const next   = isDark ? 'light' : 'dark';
+
+  // 1. Update page-level Bootstrap theme
+  htmlEl.setAttribute('data-bs-theme', next);
+
+  // 2. Update toggle icon
+  themeIcon.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+
+  // ✅ 3. Update the editor theme WITHOUT remounting
+  if (window._docflowEditor) {
+    window._docflowEditor.setTheme(next);
+  }
+});
+
+// ── Check OS preference on load ──────────────────────────────────
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  // Opt-in here if you want auto dark on load:
+  // htmlEl.setAttribute('data-bs-theme', 'dark');
+  // themeIcon.className = 'bi bi-sun';
+}
+
+/* ─── Copy-to-clipboard ─────────────────────────────────────────── */
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const wrap = btn.closest('.code-wrap, .snippet-card .code-inner');
+    const codeEl = wrap ? wrap.querySelector('code') : null;
+    if (!codeEl) return;
+
+    const original = btn.textContent;
+    try {
+      await navigator.clipboard.writeText(codeEl.textContent);
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+    } catch {
+      btn.textContent = '⌘+C';
+    }
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1600);
+  });
+});
+
+/* ─── Tool grid: search + category filter ───────────────────────── */
+const toolCards    = Array.from(document.querySelectorAll('.tool-card[data-category]'));
+const toolSearch   = document.getElementById('toolSearch');
+const catChips     = document.querySelectorAll('.cat-chip');
+const noToolsMsg   = document.getElementById('noToolsMsg');
+const noToolsTerm  = document.getElementById('noToolsTerm');
+const toolCount    = document.getElementById('toolCount');
+let   activeCat    = 'all';
+
+function applyFilters() {
+  const q = toolSearch.value.trim().toLowerCase();
+  let visible = 0;
+  toolCards.forEach(card => {
+    const matchCat  = activeCat === 'all' || card.dataset.category === activeCat;
+    const matchText = !q
+      || card.dataset.name.toLowerCase().includes(q)
+      || card.querySelector('.tool-card-name').textContent.toLowerCase().includes(q)
+      || card.querySelector('.tool-card-desc').textContent.toLowerCase().includes(q);
+    const show = matchCat && matchText;
+    card.dataset.hidden = show ? 'false' : 'true';
+    if (show) visible++;
+  });
+
+  const total = activeCat === 'all' ? toolCards.length : toolCards.filter(c => c.dataset.category === activeCat).length;
+  toolCount.textContent = q || activeCat !== 'all' ? `${visible} / ${total}` : `${total} tools`;
+
+  const showEmpty = visible === 0;
+  noToolsMsg.style.display = showEmpty ? 'block' : 'none';
+  if (showEmpty) noToolsTerm.textContent = q || activeCat;
+}
+
+toolSearch.addEventListener('input', applyFilters);
+
+catChips.forEach(chip => {
+  const onActivate = () => {
+    catChips.forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+    chip.classList.add('active');
+    chip.setAttribute('aria-pressed', 'true');
+    activeCat = chip.dataset.filter;
+    applyFilters();
+  };
+  chip.addEventListener('click', onActivate);
+  chip.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); } });
+});
+
+applyFilters(); // initialise count display
+
+/* ─── Tool Tester ───────────────────────────────────────────────── */
+const testerBtns   = document.querySelectorAll('.tester-action-btn[data-action]');
+const testerOutput = document.getElementById('testerOutput');
+const testerVal    = document.getElementById('testerOutputVal');
+
+function showOutput(label, val) {
+  testerOutput.querySelector('.out-label').textContent = label;
+  testerVal.textContent = val;
+  testerOutput.classList.add('visible');
+}
+
+testerBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const editor = window._docflowEditor;
+    if (!editor) { showOutput('Status', 'Editor not loaded — check src/editor.js path'); return; }
+
+    switch (btn.dataset.action) {
+      case 'getHTML':
+        showOutput('editor.getHTML()', editor.getHTML().slice(0, 300) + (editor.getHTML().length > 300 ? '…' : ''));
+        break;
+      case 'getText':
+        showOutput('editor.getText()', editor.getText().slice(0, 300) + (editor.getText().length > 300 ? '…' : ''));
+        break;
+      case 'wordCount': {
+        const text  = editor.getText().trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        const chars = text.length;
+        showOutput('Word / char count', `${words} words, ${chars} characters`);
+        break;
+      }
+      case 'setThemeDark':
+        editor.setTheme('dark');
+        htmlEl.setAttribute('data-bs-theme', 'dark');
+        themeIcon.className = 'bi bi-sun';
+        showOutput('editor.setTheme()', 'Theme set to dark ✓');
+        break;
+      case 'setThemeLight':
+        editor.setTheme('light');
+        htmlEl.setAttribute('data-bs-theme', 'light');
+        themeIcon.className = 'bi bi-moon-stars';
+        showOutput('editor.setTheme()', 'Theme set to light ✓');
+        break;
+      case 'focus':
+        editor.focus();
+        showOutput('editor.focus()', 'Focus sent to content area ✓');
+        break;
+      case 'setHTML':
+        editor.setHTML('<h2>Injected via setHTML()</h2><p>This content was set programmatically using <strong>editor.setHTML()</strong> from the Tool Tester.</p>');
+        showOutput('editor.setHTML()', 'Content replaced ✓');
+        break;
+      case 'clear':
+        editor.clear();
+        showOutput('editor.clear()', 'Content cleared ✓');
+        break;
+    }
+  });
+});
+</script>
+
+<!-- ── Editor init (module) ───────────────────────────────────────── -->
+<script type="module">
+import { DocFlowEditor } from './src/docflow.js';
+
+const initialContent = `
+<h1>Welcome to DocFlowEditor</h1>
+
+<p>
+  <strong>DocFlowEditor</strong> is a modular, lightweight rich text editor
+  designed for creating clean, structured, and professional documents directly
+  in the browser — with zero dependencies and no build step.
+</p>
+
+<h2>A focused writing experience</h2>
+
+<p>
+  The editor ships with familiar formatting controls — <strong>bold</strong>,
+  <em>italic</em>, <u>underline</u>, headings, lists, alignment, text colors,
+  highlights, links, and more. A floating selection toolbar surfaces the most
+  useful actions right next to your selected text.
+</p>
+
+<h2>Built for customization</h2>
+
+<p>
+  Every toolbar button is its own independent module. Pass a <code>tools</code>
+  array to include only what you need, in the order you want. Register your own
+  custom tools using the simple <code>registerTool()</code> API.
+</p>
+
+<blockquote>
+  "Good editing tools should feel simple for beginners while remaining powerful
+  enough for advanced document workflows."
+</blockquote>
+
+<p>
+  Select some text and try the toolbar above. Use <strong>Ctrl+B</strong> for bold,
+  <strong>Ctrl+I</strong> for italic, or open the Tool Tester below to run API
+  methods live against this editor instance.
+</p>
+`;
+
+const editor = new DocFlowEditor('#my-editor', {
+  tools: null,
+  placeholder: 'Start writing…',
+  minHeight: 100,
+  onChange: () => {},
+  initialContent,
+  theme: 'light',
+  showStatusBar: true,
+});
+
+// Expose globally so the Theme Toggle and Tool Tester can reach it
+window._docflowEditor = editor;
+</script>
+</body>
+</html>

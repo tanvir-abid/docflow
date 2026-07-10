@@ -1,0 +1,1552 @@
+
+
+/* ── RTE CSS Variables (light defaults) ── */
+.rte-editor {
+  --rte-bg:             #ffffff;
+  --rte-border:         #e2e4e9;
+  --rte-border-focus:   #6c63ff;
+  --rte-toolbar-bg:     #f8f9fb;
+  --rte-toolbar-border: #e2e4e9;
+  --rte-btn-hover:      #edeef2;
+  --rte-btn-active-bg:  #e8e6ff;
+  --rte-btn-active-fg:  #5b52e8;
+  --rte-btn-color:      #3d3f4a;
+  --rte-text:           #1a1b23;
+  --rte-placeholder:    #9a9dac;
+  --rte-radius:         10px;
+  --rte-font:           -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --rte-mono:           'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --rte-shadow:         0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --rte-select-bg:      #f8f9fb;
+  --rte-select-border:  #e2e4e9;
+  --rte-popover-bg:     #ffffff;
+  --rte-popover-shadow: 0 4px 20px rgba(0,0,0,.14);
+  --rte-code-bg:        #f3f4f8;
+  --rte-code-text:      #c7254e;
+  --rte-pre-bg:         #1e1f2e;
+  --rte-pre-text:       #e2e4f0;
+  --rte-bq-border:      #6c63ff;
+  --rte-bq-bg:          rgba(108,99,255,.06);
+  --rte-hr-color:       #565656;
+  --rte-link-color:     #5b52e8;
+}
+
+/* ── Dark mode ── */
+.rte-editor[data-theme="dark"] {
+  --rte-bg:             #1a1b23;
+  --rte-border:         #2e3040;
+  --rte-border-focus:   #7c75ff;
+  --rte-toolbar-bg:     #14151d;
+  --rte-toolbar-border: #2e3040;
+  --rte-btn-hover:      #24263a;
+  --rte-btn-active-bg:  #2d2a5c;
+  --rte-btn-active-fg:  #a8a2ff;
+  --rte-btn-color:      #c8cad8;
+  --rte-text:           #e8eaf2;
+  --rte-placeholder:    #5a5d74;
+  --rte-select-bg:      #14151d;
+  --rte-select-border:  #2e3040;
+  --rte-popover-bg:     #22243a;
+  --rte-popover-shadow: 0 4px 24px rgba(0,0,0,.4);
+  --rte-code-bg:        #2a2c3e;
+  --rte-code-text:      #f08080;
+  --rte-pre-bg:         #111219;
+  --rte-pre-text:       #cdd3de;
+  --rte-bq-border:      #7c75ff;
+  --rte-bq-bg:          rgba(124,117,255,.08);
+  --rte-hr-color:       #2e3040;
+  --rte-link-color:     #a8a2ff;
+}
+
+/* ── Editor container ── */
+.rte-editor {
+  display: flex; flex-direction: column;
+  /* border: 1.5px solid var(--rte-border); */
+  border-radius: var(--rte-radius);
+  background: var(--rte-bg);
+  font-family: var(--rte-font);
+  /* box-shadow: var(--rte-shadow); */
+  /* transition: border-color .18s ease, box-shadow .18s ease; */
+  overflow: visible;
+  position: relative;
+}
+.rte-editor:focus-within {
+  /* border-color: var(--rte-border-focus); */
+  /* box-shadow: var(--rte-shadow), 0 0 0 3px color-mix(in srgb, var(--rte-border-focus) 18%, transparent); */
+}
+
+/* ── Toolbar ── */
+.rte-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 2px; padding: 6px 8px;
+  background: var(--rte-toolbar-bg);
+  border-bottom: 1px solid var(--rte-toolbar-border);
+  border-radius: var(--rte-radius) var(--rte-radius) 0 0;
+  user-select: none; min-height: 46px;
+}
+.rte-toolbar-divider {
+  width: 1px; height: 22px;
+  background: var(--rte-toolbar-border);
+  margin: 0 4px; flex-shrink: 0;
+}
+
+/* ── Toolbar buttons ── */
+.rte-tool-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0;
+  border: none; border-radius: 6px;
+  background: transparent; color: var(--rte-btn-color);
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease, opacity .12s ease;
+  flex-shrink: 0; outline: none;
+}
+.rte-tool-btn:hover { background: var(--rte-btn-hover); }
+.rte-tool-btn:focus-visible { outline: 2px solid var(--rte-border-focus); outline-offset: 1px; }
+.rte-tool-btn.rte-tool-active { background: var(--rte-btn-active-bg); color: var(--rte-btn-active-fg); }
+.rte-tool-btn svg { pointer-events: none; display: block; }
+
+/* ── Selects (heading, font size, font family) ── */
+.rte-heading-wrapper { display: inline-flex; align-items: center; }
+.rte-tool-select {
+  height: 32px; padding: 0 26px 0 10px;
+  font-size: 13px; font-family: var(--rte-font); font-weight: 500;
+  color: var(--rte-btn-color); background: var(--rte-select-bg);
+  border: 1.5px solid var(--rte-select-border); border-radius: 6px;
+  cursor: pointer; appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9dac' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  transition: border-color .12s ease; outline: none; min-width: 112px;
+}
+.rte-tool-select:hover { border-color: var(--rte-border-focus); }
+.rte-tool-select:focus-visible { border-color: var(--rte-border-focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--rte-border-focus) 20%, transparent); }
+
+/* ── Content area ── */
+.rte-content {
+  flex: 1; padding: 16px 20px;
+  min-height: var(--rte-min-height, 180px);
+  color: var(--rte-text); background: var(--rte-bg);
+  outline: none; overflow-y: auto;
+  line-height: 1.7; font-size: 15px; font-family: var(--rte-font);
+  caret-color: var(--rte-border-focus); word-break: break-word;
+}
+.rte-content:empty::before {
+  content: attr(data-placeholder);
+  color: var(--rte-placeholder); pointer-events: none;
+}
+
+/* ── Prose styles inside editor ── */
+.rte-content h1 { font-size: 2em;    font-weight: 700; line-height: 1.25; margin: 0em }
+.rte-content h2 { font-size: 1.5em;  font-weight: 650; line-height: 1.3;  margin: 0em }
+.rte-content h3 { font-size: 1.25em; font-weight: 600; line-height: 1.35; margin: 0em }
+.rte-content h4 { font-size: 1.1em;  font-weight: 600; line-height: 1.4;  margin: 0em }
+.rte-content h5 { font-size: 1em;    font-weight: 600; line-height: 1.45; margin: 0em }
+.rte-content h6 { font-size: .9em;   font-weight: 600; line-height: 1.5;  margin: 0em; color: var(--rte-placeholder); }
+.rte-content p  { margin: 0; }
+.rte-content p:last-child, .rte-content h1:last-child, .rte-content h2:last-child,
+.rte-content h3:last-child, .rte-content h4:last-child { margin-bottom: 0; }
+
+.rte-content a { color: var(--rte-link-color); text-decoration: underline; }
+.rte-content a:hover { opacity: .8; }
+
+.rte-content code {
+  background: var(--rte-code-bg); color: var(--rte-code-text);
+  font-family: var(--rte-mono); font-size: .875em;
+  padding: .1em .35em; border-radius: 4px;
+}
+
+.rte-content pre.rte-code-block {
+  background: var(--rte-pre-text); color: var(--rte-pre-bg);
+  font-family: var(--rte-mono); font-size: 13.5px;
+  padding: 14px 18px; border-radius: 8px;
+  overflow-x: auto; margin: 1em 0; line-height: 1.6;
+  white-space: pre; text-wrap: auto;
+}
+.rte-content pre.rte-code-block code {
+  background: none; color: inherit;
+  font-size: inherit; padding: 0; border-radius: 0;
+}
+
+.rte-content blockquote {
+  border-left: 3px solid var(--rte-bq-border);
+  background: var(--rte-bq-bg);
+  margin: 1em 0; padding: .6em 1em;
+  border-radius: 0 6px 6px 0;
+  color: var(--rte-text);
+}
+
+.rte-content hr {
+  border: none;
+  border-top: 2px solid var(--rte-hr-color);
+  margin: 1.2em 0;
+}
+
+.rte-content ol, .rte-content ul {
+  padding-left: 1.5em; margin: 0 0 .75em;
+}
+.rte-content li { margin: 0; }
+
+/* ── Checklist ── */
+.rte-checklist-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0;
+}
+.rte-checklist-checkbox {
+  margin-top: 3px; width: 15px; height: 15px;
+  accent-color: var(--rte-border-focus);
+  cursor: pointer; flex-shrink: 0;
+}
+.rte-checklist-label {
+  flex: 1; outline: none; min-width: 20px;
+}
+.rte-checklist-label.rte-checklist-done {
+  text-decoration: line-through;
+  color: var(--rte-placeholder);
+}
+
+/* ── Link popover ── */
+.rte-link-popover {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--rte-popover-bg);
+  border: 1.5px solid var(--rte-border);
+  border-radius: 8px; padding: 5px 7px;
+  box-shadow: var(--rte-popover-shadow);
+}
+.rte-link-input {
+  height: 28px; padding: 0 10px; width: 220px;
+  border: 1.5px solid var(--rte-select-border);
+  border-radius: 6px; font-size: 13px;
+  font-family: var(--rte-font);
+  color: var(--rte-text); background: var(--rte-bg);
+  outline: none;
+}
+.rte-link-input:focus { border-color: var(--rte-border-focus); }
+.rte-link-apply, .rte-link-cancel {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 6px; cursor: pointer;
+  background: transparent; color: var(--rte-btn-color);
+  transition: background .12s;
+}
+.rte-link-apply { background: var(--rte-btn-active-bg); color: var(--rte-btn-active-fg); }
+.rte-link-apply:hover { opacity: .85; }
+.rte-link-cancel:hover { background: var(--rte-btn-hover); }
+
+/* ── Status bar ── */
+.rte-statusbar {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 12px; padding: 4px 14px;
+  font-size: 11.5px; color: var(--rte-placeholder);
+  background: var(--rte-toolbar-bg);
+  border-top: 1px solid var(--rte-toolbar-border);
+  border-radius: 0 0 var(--rte-radius) var(--rte-radius);
+  font-family: var(--rte-font); letter-spacing: .01em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .rte-toolbar { gap: 1px; padding: 5px 5px; }
+  .rte-tool-btn { width: 28px; height: 28px; }
+  .rte-tool-select { min-width: 82px; font-size: 12px; }
+  .rte-content { padding: 12px 14px; font-size: 14px; }
+  .rte-link-input { width: 150px; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ── Inserted table ─────────────────────────────────────────── */
+table,
+.rte-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: inherit;
+  table-layout: fixed;
+}
+
+table td,
+table th,
+.rte-table td,
+.rte-table th {
+  border: 1.5px solid #c1c6dd;
+  padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+  outline: none;
+  word-break: break-word;
+}
+table th,
+.rte-table th {
+  background: #f3f4f8;
+  font-weight: 600;
+  text-align: center;
+}
+
+table tfoot td,
+table tfoot th,
+.rte-table tfoot td,
+.rte-table tfoot th {
+  background: #f3f4f8;
+  font-style: italic;
+  font-size: .92em;
+}
+
+
+.rte-editor[data-theme="dark"] .rte-table td,
+.rte-editor[data-theme="dark"] .rte-table th { border-color: #3a3d54; }
+.rte-editor[data-theme="dark"] .rte-table th,
+.rte-editor[data-theme="dark"] .rte-table tfoot td { background: #22243a; }
+
+/* focused cell highlight */
+.rte-table td:focus,
+.rte-table th:focus { outline: 2px solid var(--rte-border-focus, #6c63ff); outline-offset: -2px; }
+
+/* ── Grid picker ────────────────────────────────────────────── */
+.rte-table-picker {
+  background: var(--rte-popover-bg, #fff);
+  border: 1.5px solid var(--rte-border, #e2e4e9);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: var(--rte-popover-shadow, 0 4px 20px rgba(0,0,0,.14));
+  user-select: none;
+}
+.rte-tp-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rte-placeholder, #9a9dac);
+  margin-bottom: 8px;
+  text-align: center;
+  letter-spacing: .04em;
+}
+.rte-tp-grid {
+  display: grid;
+  gap: 3px;
+}
+.rte-tp-cell {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--rte-border, #e2e4e9);
+  border-radius: 3px;
+  cursor: pointer;
+  background: var(--rte-bg, #fff);
+  transition: background .1s, border-color .1s;
+}
+.rte-tp-cell-on {
+  background: color-mix(in srgb, var(--rte-border-focus, #6c63ff) 20%, transparent);
+  border-color: var(--rte-border-focus, #6c63ff);
+}
+
+/* ── Context panel ──────────────────────────────────────────── */
+.rte-table-ctx {
+  background: var(--rte-popover-bg, #fff);
+  border: 1.5px solid var(--rte-border, #e2e4e9);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: var(--rte-popover-shadow, 0 4px 20px rgba(0,0,0,.14));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--rte-font, system-ui, sans-serif);
+  font-size: 12px;
+  max-width: calc(100% - 16px);
+}
+.rte-tctx-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 12px;
+  border-right: 1px solid var(--rte-toolbar-border, #e2e4e9);
+  min-width: 0;
+}
+.rte-tctx-group:last-child { border-right: none; padding-right: 0; }
+.rte-tctx-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--rte-placeholder, #9a9dac);
+  white-space: nowrap;
+}
+.rte-tctx-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+.rte-tctx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rte-btn-color, #3d3f4a);
+  cursor: pointer;
+  transition: background .12s;
+  flex-shrink: 0;
+}
+.rte-tctx-btn:hover { background: var(--rte-btn-hover, #edeef2); }
+.rte-tctx-btn.rte-tctx-danger { color: #e53e3e; }
+.rte-tctx-btn.rte-tctx-danger:hover { background: #fff0f0; }
+.rte-tctx-toggle {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--rte-btn-color, #3d3f4a);
+}
+.rte-tctx-toggle.rte-tctx-on {
+  background: var(--rte-btn-active-bg, #e8e6ff);
+  color: var(--rte-btn-active-fg, #5b52e8);
+}
+.rte-tctx-color-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  position: relative;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 6px;
+  transition: background .12s;
+}
+.rte-tctx-color-wrap:hover { background: var(--rte-btn-hover, #edeef2); }
+.rte-tctx-color-wrap input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  top: 0; left: 0;
+  padding: 0;
+  border: none;
+}
+.rte-tctx-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--rte-border, #e2e4e9);
+  display: block;
+  flex-shrink: 0;
+}
+.rte-tctx-clr-lbl {
+  font-size: 11px;
+  color: var(--rte-btn-color, #3d3f4a);
+  white-space: nowrap;
+}
+.rte-tctx-select {
+  height: 26px;
+  padding: 0 20px 0 7px;
+  font-size: 11.5px;
+  border: 1.5px solid var(--rte-select-border, #e2e4e9);
+  border-radius: 5px;
+  background: var(--rte-select-bg, #f8f9fb);
+  color: var(--rte-btn-color, #3d3f4a);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239a9dac' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  max-width: 100px;
+}
+.rte-tctx-select:hover { border-color: var(--rte-border-focus, #6c63ff); }
+.rte-tctx-apply {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--rte-btn-active-bg, #e8e6ff);
+  color: var(--rte-btn-active-fg, #5b52e8);
+  border-radius: 6px;
+  height: 26px;
+  white-space: nowrap;
+}
+.rte-tctx-apply:hover { opacity: .85; }
+
+/* dark-mode ctx panel */
+.rte-editor[data-theme="dark"] .rte-table-ctx {
+  background: var(--rte-popover-bg);
+  border-color: var(--rte-border);
+}
+.rte-editor[data-theme="dark"] .rte-tctx-select {
+  background: var(--rte-select-bg);
+  border-color: var(--rte-select-border);
+  color: var(--rte-btn-color);
+}
+.rte-editor[data-theme="dark"] .rte-table-picker {
+  background: var(--rte-popover-bg);
+  border-color: var(--rte-border);
+}
+.rte-editor[data-theme="dark"] .rte-tp-cell {
+  background: var(--rte-bg);
+  border-color: var(--rte-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   table_v2 — new CSS additions
+   Add these rules to your existing RTE stylesheet.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Table Edit toolbar button ──────────────────────────────── */
+/* Sits right next to the insert button; hidden until a table exists */
+.rte-table-edit-btn {
+  /* inherits .rte-tool-btn — no extra sizing needed */
+  position: relative;     /* so the badge SVG can overlap cleanly */
+}
+
+/* ── Drag-selected cells highlight ─────────────────────────── */
+.rte-table td.rte-cell-selected,
+.rte-table th.rte-cell-selected {
+  outline: 2px solid var(--rte-accent, #4a90e2);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--rte-accent, #4a90e2) 12%, transparent);
+}
+
+/* ── Context-panel close button ─────────────────────────────── */
+.rte-tctx-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--rte-muted, #888);
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.rte-tctx-close:hover {
+  background: var(--rte-danger-bg, #fde8e8);
+  color: var(--rte-danger, #d9363e);
+}
+
+/* Give the panel a little top padding so the × doesn't overlap the first group */
+.rte-table-ctx {
+  padding-top: 28px;  /* room for the close button row */
+  position: relative; /* needed for the absolute close btn */
+}
+
+/* ── Scope selects inside groups ─────────────────────────────── */
+/* The new "Apply to" selects sit on the same row as other controls */
+.rte-tctx-row select.rte-tctx-select {
+  margin-right: 4px;
+}
+
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════
+   image_cols_new.css
+   Replace your existing image.css entirely with this file,
+   then append the columns section at the bottom.
+   ═══════════════════════════════════════════════════════════════ */
+
+
+/* ════════════════════════════════════════════════════════════════
+   IMAGE TOOL
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Insert dialog ──────────────────────────────────────────── */
+.rte-img-dialog {
+  background    : var(--rte-panel-bg, #fff);
+  border        : 1px solid var(--rte-border, #d1d5db);
+  border-radius : 8px;
+  box-shadow    : 0 6px 24px rgba(0,0,0,.12);
+  padding       : 14px 16px 12px;
+  min-width     : 300px;
+  display       : flex;
+  flex-direction: column;
+  gap           : 10px;
+}
+.rte-img-dialog-title {
+  font-size   : 13px;
+  font-weight : 600;
+  color       : var(--rte-text, #111);
+  margin-bottom: 2px;
+}
+.rte-img-dialog-row {
+  display       : flex;
+  flex-direction: column;
+  gap           : 4px;
+}
+.rte-img-dialog-label {
+  font-size  : 11px;
+  color      : var(--rte-muted, #6b7280);
+  font-weight: 500;
+}
+.rte-img-dialog-input {
+  border       : 1px solid var(--rte-border, #d1d5db);
+  border-radius: 5px;
+  padding      : 6px 8px;
+  font-size    : 13px;
+  color        : var(--rte-text, #111);
+  background   : var(--rte-input-bg, #fff);
+  outline      : none;
+  transition   : border-color .15s;
+}
+.rte-img-dialog-input:focus {
+  border-color: var(--rte-accent, #4a90e2);
+  box-shadow  : 0 0 0 2px color-mix(in srgb, var(--rte-accent,#4a90e2) 15%, transparent);
+}
+.rte-img-dialog-btnrow {
+  display        : flex;
+  justify-content: flex-end;
+  gap            : 8px;
+  margin-top     : 2px;
+}
+.rte-img-dialog-btn {
+  padding      : 5px 14px;
+  border-radius: 5px;
+  border       : 1px solid var(--rte-border, #d1d5db);
+  font-size    : 12px;
+  cursor       : pointer;
+  background   : var(--rte-panel-bg, #fff);
+  color        : var(--rte-text, #111);
+  transition   : background .12s;
+}
+.rte-img-dialog-btn:hover { background: var(--rte-hover-bg, #f3f4f6); }
+.rte-img-dialog-btn-primary {
+  background  : var(--rte-accent, #4a90e2);
+  color       : #fff;
+  border-color: var(--rte-accent, #4a90e2);
+}
+.rte-img-dialog-btn-primary:hover {
+  background  : color-mix(in srgb, var(--rte-accent,#4a90e2) 85%, #000);
+  border-color: color-mix(in srgb, var(--rte-accent,#4a90e2) 85%, #000);
+}
+
+/* ── Layout picker (inside dialog) ─────────────────────────── */
+.rte-img-layout-picker {
+  display: flex;
+  gap    : 4px;
+  flex-wrap: wrap;
+}
+.rte-img-layout-btn {
+  width        : 36px;
+  height       : 32px;
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  border       : 1px solid var(--rte-border, #d1d5db);
+  border-radius: 5px;
+  background   : transparent;
+  color        : var(--rte-text, #374151);
+  cursor       : pointer;
+  transition   : background .1s, border-color .1s;
+}
+.rte-img-layout-btn:hover    { background: var(--rte-hover-bg, #f3f4f6); }
+.rte-img-layout-active {
+  background  : color-mix(in srgb, var(--rte-accent,#4a90e2) 12%, transparent) !important;
+  border-color: var(--rte-accent, #4a90e2) !important;
+  color       : var(--rte-accent, #4a90e2) !important;
+}
+
+/* ── Block figure ───────────────────────────────────────────── */
+.rte-img-figure {
+  display    : block;
+  margin     : 8px 0;
+  position   : relative;
+  line-height: 0;
+  user-select: none;
+}
+.rte-img-align-left   { text-align: left;   }
+.rte-img-align-center { text-align: center; }
+.rte-img-align-right  { text-align: right;  }
+
+/* ── The <img> ──────────────────────────────────────────────── */
+.rte-img {
+  max-width    : 100%;
+  height       : auto;
+  display      : inline-block;
+  border-radius: 3px;
+  cursor       : pointer;
+  transition   : box-shadow .15s;
+}
+.rte-img-selected .rte-img {
+  box-shadow: 0 0 0 2px var(--rte-accent, #4a90e2);
+}
+
+/* ── Wrap block ─────────────────────────────────────────────── */
+/*
+   The wrap-block is contenteditable="false". It uses CSS grid
+   for a true side-by-side layout. The figure column has a fixed
+   flex-basis (set via JS width presets / resize), and the text
+   column fills the remaining space.
+*/
+.rte-img-wrap-block {
+  display        : flex;
+  align-items    : flex-start;
+  gap            : 16px;
+  margin         : 12px 0;
+  /* Prevent the block itself from swallowing clicks meant for the
+     text pane — pointer-events on children handle everything */
+}
+
+/* Image on left, text on right */
+.rte-img-wrap-left  { flex-direction: row; }
+/* Image on right, text on left */
+.rte-img-wrap-right { flex-direction: row-reverse; }
+
+/* The figure column */
+.rte-img-wrap-figure {
+  position    : relative;
+  flex-shrink : 0;
+  flex-basis  : 40%;    /* default starting width; overridden by JS */
+  line-height : 0;
+  margin      : 0;
+  user-select : none;
+}
+.rte-img-wrap-figure .rte-img {
+  width : 100%;
+  height: auto;
+  display: block;
+}
+
+/* The editable text column */
+.rte-img-text {
+  flex       : 1 1 0;
+  min-width  : 80px;
+  /* Re-enable text cursor for this sub-region */
+  cursor     : text;
+  line-height: 1.6;
+  color      : var(--rte-text, #111);
+  outline    : none;
+  /* Subtle guide border so users know it's editable */
+  border     : 1px dashed transparent;
+  border-radius: 4px;
+  padding    : 4px 6px;
+  transition : border-color .15s;
+}
+.rte-img-text:focus,
+.rte-img-text:focus-within {
+  border-color: color-mix(in srgb, var(--rte-accent,#4a90e2) 35%, transparent);
+}
+/* Placeholder text when empty */
+.rte-img-text:empty::before,
+.rte-img-text p:only-child:empty::before,
+.rte-img-text p:only-child br:only-child ~ *,
+.rte-img-text > p:first-child:last-child:has(br):before {
+  content : attr(data-placeholder);
+  color   : var(--rte-muted, #9ca3af);
+  pointer-events: none;
+}
+/* Simpler cross-browser placeholder approach */
+.rte-img-text[data-placeholder]:not(:focus):not([data-has-content]) > p:first-child:last-child {
+  position: relative;
+}
+.rte-img-text[data-placeholder]:not(:focus):not([data-has-content]) > p:first-child:last-child::before {
+  content : attr(data-placeholder);
+  color   : var(--rte-muted, #9ca3af);
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ── Per-image floating toolbar ─────────────────────────────── */
+.rte-img-toolbar {
+  display      : flex;
+  align-items  : center;
+  gap          : 2px;
+  padding      : 4px 6px;
+  background   : var(--rte-panel-bg, #fff);
+  border       : 1px solid var(--rte-border, #d1d5db);
+  border-radius: 7px;
+  box-shadow   : 0 4px 16px rgba(0,0,0,.1);
+  position     : absolute;
+  z-index      : 1060;
+  white-space  : nowrap;
+}
+.rte-img-tb-btn {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 28px;
+  height         : 26px;
+  padding        : 0;
+  border         : none;
+  border-radius  : 4px;
+  background     : transparent;
+  color          : var(--rte-text, #374151);
+  cursor         : pointer;
+  transition     : background .1s, color .1s;
+  flex-shrink    : 0;
+}
+.rte-img-tb-btn:hover { background: var(--rte-hover-bg, #f3f4f6); }
+.rte-img-tb-active {
+  background: color-mix(in srgb, var(--rte-accent,#4a90e2) 14%, transparent) !important;
+  color     : var(--rte-accent, #4a90e2) !important;
+}
+.rte-img-tb-size {
+  width      : auto;
+  padding    : 0 6px;
+  font-size  : 11px;
+  font-weight: 600;
+}
+.rte-img-tb-danger:hover {
+  background: var(--rte-danger-bg, #fde8e8) !important;
+  color     : var(--rte-danger, #d9363e) !important;
+}
+.rte-img-tb-divider {
+  width      : 1px;
+  height     : 18px;
+  background : var(--rte-border, #e5e7eb);
+  margin     : 0 3px;
+  flex-shrink: 0;
+}
+
+/* ── Resize handle ──────────────────────────────────────────── */
+.rte-img-resize-handle {
+  position     : absolute;
+  bottom       : 4px;
+  right        : 4px;
+  width        : 12px;
+  height       : 12px;
+  background   : var(--rte-accent, #4a90e2);
+  border       : 2px solid #fff;
+  border-radius: 3px;
+  cursor       : se-resize;
+  z-index      : 10;
+  box-shadow   : 0 1px 4px rgba(0,0,0,.25);
+}
+
+/* ── Clearfix (safety net for any floated content) ─────────── */
+.rte-content::after {
+  content: '';
+  display: table;
+  clear  : both;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   COLUMNS TOOL
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Picker panel ───────────────────────────────────────────── */
+.rte-cols-picker {
+  background    : var(--rte-panel-bg, #fff);
+  border        : 1px solid var(--rte-border, #d1d5db);
+  border-radius : 8px;
+  box-shadow    : 0 6px 24px rgba(0,0,0,.12);
+  padding       : 10px 12px;
+  display       : flex;
+  flex-direction: column;
+  gap           : 8px;
+  min-width     : 160px;
+}
+.rte-cols-picker-title {
+  font-size  : 12px;
+  font-weight: 600;
+  color      : var(--rte-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.rte-cols-picker-grid {
+  display: flex;
+  gap    : 8px;
+}
+.rte-cols-picker-opt {
+  display       : flex;
+  flex-direction: column;
+  align-items   : center;
+  gap           : 5px;
+  padding       : 8px 10px;
+  border        : 1px solid var(--rte-border, #d1d5db);
+  border-radius : 6px;
+  background    : transparent;
+  color         : var(--rte-text, #374151);
+  cursor        : pointer;
+  font-size     : 11px;
+  font-weight   : 500;
+  transition    : background .1s, border-color .1s;
+  flex          : 1;
+}
+.rte-cols-picker-opt:hover {
+  background  : var(--rte-hover-bg, #f3f4f6);
+  border-color: var(--rte-accent, #4a90e2);
+  color       : var(--rte-accent, #4a90e2);
+}
+
+/* ── Column block ───────────────────────────────────────────── */
+.rte-cols {
+  display       : grid;
+  gap           : 16px;
+  margin        : 12px 0;
+  width         : 100%;
+  box-sizing    : border-box;
+}
+.rte-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.rte-cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── Individual column ──────────────────────────────────────── */
+.rte-col {
+  min-height    : 48px;
+  padding       : 4px 6px;
+  /* border-radius : 4px; */
+  outline       : none;
+  cursor        : text;
+  color         : var(--rte-text, #111);
+  line-height   : 1.6;
+  /* Dashed separator between columns */
+  /* border-right  : 1px dashed var(--rte-border, #d1d5db); */
+  transition    : border-color .15s, background .15s;
+}
+.rte-col:last-child { border-right: none; }
+.rte-col:focus {
+  background  : color-mix(in srgb, var(--rte-accent,#4a90e2) 4%, transparent);
+  border-right-color: color-mix(in srgb, var(--rte-accent,#4a90e2) 30%, transparent);
+}
+.rte-col:last-child:focus { background: color-mix(in srgb, var(--rte-accent,#4a90e2) 4%, transparent); }
+
+/* Placeholder for empty columns */
+.rte-col:empty::before,
+.rte-col > p:first-child:last-child:has(> br:only-child)::before {
+  content       : 'Type here…';
+  color         : var(--rte-muted, #9ca3af);
+  pointer-events: none;
+}
+
+/* ── Columns floating toolbar ───────────────────────────────── */
+.rte-cols-toolbar {
+  display      : flex;
+  align-items  : center;
+  gap          : 2px;
+  padding      : 4px 6px;
+  background   : var(--rte-panel-bg, #fff);
+  border       : 1px solid var(--rte-border, #d1d5db);
+  border-radius: 7px;
+  box-shadow   : 0 4px 16px rgba(0,0,0,.1);
+  position     : absolute;
+  z-index      : 1060;
+  white-space  : nowrap;
+}
+.rte-cols-tb-btn {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 30px;
+  height         : 26px;
+  padding        : 0;
+  border         : none;
+  border-radius  : 4px;
+  background     : transparent;
+  color          : var(--rte-text, #374151);
+  cursor         : pointer;
+  transition     : background .1s, color .1s;
+}
+.rte-cols-tb-btn:hover { background: var(--rte-hover-bg, #f3f4f6); }
+.rte-cols-tb-active {
+  background: color-mix(in srgb, var(--rte-accent,#4a90e2) 14%, transparent) !important;
+  color     : var(--rte-accent, #4a90e2) !important;
+}
+.rte-cols-tb-danger:hover {
+  background: var(--rte-danger-bg, #fde8e8) !important;
+  color     : var(--rte-danger, #d9363e) !important;
+}
+.rte-cols-tb-divider {
+  width      : 1px;
+  height     : 18px;
+  background : var(--rte-border, #e5e7eb);
+  margin     : 0 3px;
+  flex-shrink: 0;
+}
+
+/* ── Responsive: stack columns on narrow screens ────────────── */
+@media (max-width: 480px) {
+  .rte-cols-2,
+  .rte-cols-3 { grid-template-columns: 1fr; }
+  .rte-img-wrap-block { flex-direction: column !important; }
+  .rte-img-wrap-figure { flex-basis: 100% !important; }
+}
+
+
+
+
+
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Emoji Picker + Special Characters — panel styles
+   Depends on the host editor's CSS variables:
+     --rte-toolbar-bg, --rte-border, --rte-radius,
+     --rte-text, --rte-text-muted, --rte-hover-bg, --rte-active-bg,
+     --rte-accent, --rte-accent-bg
+   All panels are position:absolute children of .rte-editor (position:relative).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Shared panel shell ─────────────────────────────────────────────────────
+   Both panels share the same visual container rules.                        */
+
+.rte-emoji-panel,
+.rte-sc-panel {
+  position:         absolute;
+  z-index:          9999;
+  display:          flex;
+  flex-direction:   column;
+  background:       var(--rte-toolbar-bg, #fff);
+  border:           1px solid var(--rte-border, rgba(0,0,0,.13));
+  border-radius:    var(--rte-radius, 8px);
+  box-shadow:       0 6px 24px rgba(0,0,0,.11), 0 1px 4px rgba(0,0,0,.07);
+  overflow:         hidden;
+  /* width set per-panel below */
+}
+
+/* Emoji panel — 310 px matches the JS clamp */
+.rte-emoji-panel { width: 310px; }
+
+/* Special chars panel — 330 px matches the JS clamp */
+.rte-sc-panel    { width: 330px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EMOJI PICKER
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Search row */
+.rte-emoji-search-wrap {
+  padding:    8px 10px 6px;
+  border-bottom: 1px solid var(--rte-border, rgba(0,0,0,.08));
+}
+
+.rte-emoji-search {
+  width:            100%;
+  box-sizing:       border-box;
+  height:           30px;
+  padding:          0 10px;
+  border:           1px solid var(--rte-border, rgba(0,0,0,.13));
+  border-radius:    var(--rte-radius, 6px);
+  background:       var(--rte-hover-bg, rgba(0,0,0,.04));
+  color:            var(--rte-text, inherit);
+  font-size:        13px;
+  outline:          none;
+  transition:       border-color .15s;
+}
+
+.rte-emoji-search:focus {
+  border-color: var(--rte-accent, #4f7cf8);
+  background:   var(--rte-toolbar-bg, #fff);
+}
+
+.rte-emoji-search::placeholder { color: var(--rte-text-muted, #9ca3af); }
+
+/* Category tabs */
+.rte-emoji-tabs {
+  display:          flex;
+  overflow-x:       auto;
+  gap:              2px;
+  padding:          6px 8px 0;
+  scrollbar-width:  none; /* Firefox */
+}
+.rte-emoji-tabs::-webkit-scrollbar { display: none; }
+
+.rte-emoji-tab {
+  flex-shrink:      0;
+  padding:          4px 9px 5px;
+  border:           none;
+  border-bottom:    2px solid transparent;
+  border-radius:    4px 4px 0 0;
+  background:       transparent;
+  color:            var(--rte-text-muted, #6b7280);
+  font-size:        12px;
+  font-weight:      500;
+  cursor:           pointer;
+  white-space:      nowrap;
+  transition:       color .12s, border-color .12s, background .12s;
+}
+
+.rte-emoji-tab:hover {
+  color:        var(--rte-text, inherit);
+  background:   var(--rte-hover-bg, rgba(0,0,0,.04));
+}
+
+.rte-emoji-tab-active {
+  color:        var(--rte-accent, #4f7cf8);
+  border-bottom-color: var(--rte-accent, #4f7cf8);
+  background:   transparent;
+}
+
+/* Emoji grid */
+.rte-emoji-grid-area {
+  display:          grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap:              1px;
+  padding:          6px 8px 10px;
+  max-height:       220px;
+  overflow-y:       auto;
+  scrollbar-width:  thin;
+  scrollbar-color:  var(--rte-border, rgba(0,0,0,.15)) transparent;
+}
+
+.rte-emoji-grid-area::-webkit-scrollbar       { width: 5px; }
+.rte-emoji-grid-area::-webkit-scrollbar-thumb {
+  background:    var(--rte-border, rgba(0,0,0,.18));
+  border-radius: 99px;
+}
+
+.rte-emoji-btn {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            100%;
+  aspect-ratio:     1;
+  border:           none;
+  border-radius:    5px;
+  background:       transparent;
+  font-size:        20px;
+  line-height:      1;
+  cursor:           pointer;
+  transition:       background .1s, transform .1s;
+  padding:          0;
+}
+
+.rte-emoji-btn:hover  { background: var(--rte-hover-bg,  rgba(0,0,0,.06)); transform: scale(1.18); }
+.rte-emoji-btn:active { background: var(--rte-active-bg, rgba(0,0,0,.10)); transform: scale(1.08); }
+
+/* Empty state */
+.rte-emoji-empty {
+  grid-column:  1 / -1;
+  padding:      24px 0;
+  text-align:   center;
+  font-size:    13px;
+  color:        var(--rte-text-muted, #9ca3af);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SPECIAL CHARACTERS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Header row: title + search */
+.rte-sc-header {
+  display:          flex;
+  align-items:      center;
+  gap:              8px;
+  padding:          10px 12px 8px;
+  border-bottom:    1px solid var(--rte-border, rgba(0,0,0,.08));
+}
+
+.rte-sc-title {
+  font-size:    13px;
+  font-weight:  600;
+  white-space:  nowrap;
+  color:        var(--rte-text, inherit);
+  flex-shrink:  0;
+}
+
+.rte-sc-search {
+  flex:             1;
+  min-width:        0;
+  height:           28px;
+  padding:          0 9px;
+  border:           1px solid var(--rte-border, rgba(0,0,0,.13));
+  border-radius:    var(--rte-radius, 6px);
+  background:       var(--rte-hover-bg, rgba(0,0,0,.04));
+  color:            var(--rte-text, inherit);
+  font-size:        12px;
+  outline:          none;
+  transition:       border-color .15s;
+}
+
+.rte-sc-search:focus {
+  border-color: var(--rte-accent, #4f7cf8);
+  background:   var(--rte-toolbar-bg, #fff);
+}
+
+.rte-sc-search::placeholder { color: var(--rte-text-muted, #9ca3af); }
+
+/* Category tabs */
+.rte-sc-tabs {
+  display:          flex;
+  overflow-x:       auto;
+  gap:              2px;
+  padding:          6px 10px 0;
+  scrollbar-width:  none;
+}
+.rte-sc-tabs::-webkit-scrollbar { display: none; }
+
+.rte-sc-tab {
+  flex-shrink:      0;
+  padding:          4px 9px 5px;
+  border:           none;
+  border-bottom:    2px solid transparent;
+  border-radius:    4px 4px 0 0;
+  background:       transparent;
+  color:            var(--rte-text-muted, #6b7280);
+  font-size:        12px;
+  font-weight:      500;
+  cursor:           pointer;
+  white-space:      nowrap;
+  transition:       color .12s, border-color .12s, background .12s;
+}
+
+.rte-sc-tab:hover {
+  color:      var(--rte-text, inherit);
+  background: var(--rte-hover-bg, rgba(0,0,0,.04));
+}
+
+.rte-sc-tab-active {
+  color:              var(--rte-accent, #4f7cf8);
+  border-bottom-color: var(--rte-accent, #4f7cf8);
+  background:         transparent;
+}
+
+/* Preview bar — sits between tabs and grid */
+.rte-sc-preview {
+  display:        flex;
+  align-items:    center;
+  gap:            10px;
+  padding:        6px 12px;
+  min-height:     38px;
+  border-bottom:  1px solid var(--rte-border, rgba(0,0,0,.07));
+  background:     var(--rte-hover-bg, rgba(0,0,0,.025));
+}
+
+.rte-sc-preview-char {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            28px;
+  height:           28px;
+  border:           1px solid var(--rte-border, rgba(0,0,0,.13));
+  border-radius:    5px;
+  background:       var(--rte-toolbar-bg, #fff);
+  font-size:        18px;
+  line-height:      1;
+  font-family:      serif;
+  color:            var(--rte-text, inherit);
+  flex-shrink:      0;
+  user-select:      none;
+}
+
+.rte-sc-preview-label {
+  font-size:  12px;
+  color:      var(--rte-text-muted, #9ca3af);
+  font-style: italic;
+}
+
+/* Character grid */
+.rte-sc-grid-area {
+  display:          grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap:              1px;
+  padding:          6px 10px 10px;
+  max-height:       200px;
+  overflow-y:       auto;
+  scrollbar-width:  thin;
+  scrollbar-color:  var(--rte-border, rgba(0,0,0,.15)) transparent;
+}
+
+.rte-sc-grid-area::-webkit-scrollbar       { width: 5px; }
+.rte-sc-grid-area::-webkit-scrollbar-thumb {
+  background:    var(--rte-border, rgba(0,0,0,.18));
+  border-radius: 99px;
+}
+
+.rte-sc-char-btn {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            100%;
+  aspect-ratio:     1;
+  border:           none;
+  border-radius:    4px;
+  background:       transparent;
+  font-size:        15px;
+  font-family:      serif;
+  color:            var(--rte-text, inherit);
+  cursor:           pointer;
+  transition:       background .1s, transform .08s;
+  padding:          0;
+}
+
+.rte-sc-char-btn:hover {
+  background: var(--rte-accent-bg, rgba(79,124,248,.1));
+  color:      var(--rte-accent, #4f7cf8);
+  transform:  scale(1.2);
+}
+
+.rte-sc-char-btn:active {
+  background: var(--rte-active-bg, rgba(0,0,0,.10));
+  transform:  scale(1.05);
+}
+
+/* Empty state */
+.rte-sc-empty {
+  grid-column:  1 / -1;
+  padding:      24px 0;
+  text-align:   center;
+  font-size:    13px;
+  color:        var(--rte-text-muted, #9ca3af);
+}
+
+
+
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   Line Height Tool — line-height.css
+   Uses only CSS custom properties defined in editor.js so both
+   light and dark themes work automatically.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Toolbar button wrapper ───────────────────────────────────────── */
+.rte-lh-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The button is wider than a normal icon-only button because it
+   carries the live label + chevron alongside the icon.            */
+.rte-lh-btn {
+  width: auto !important;           /* override the fixed 32px default */
+  padding: 0 6px 0 7px !important;
+  gap: 3px;
+}
+
+/* Live line-height readout ("1.5×", "2×", "—") */
+.rte-lh-label {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--rte-font);
+  color: var(--rte-placeholder);
+  min-width: 22px;
+  text-align: left;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Chevron arrow */
+.rte-lh-chevron {
+  opacity: .55;
+  flex-shrink: 0;
+  transition: transform .15s ease;
+}
+.rte-lh-btn[aria-expanded="true"] .rte-lh-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown menu ────────────────────────────────────────────────── */
+.rte-lh-menu {
+  position: absolute;
+  z-index: 1200;
+  width: 280px;
+
+  background: var(--rte-popover-bg);
+  border: 1.5px solid var(--rte-border);
+  border-radius: 10px;
+  box-shadow: var(--rte-popover-shadow);
+  padding: 6px 0 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  font-family: var(--rte-font);
+
+  /* Subtle entrance animation */
+  animation: rte-lh-appear .13s ease;
+}
+
+@keyframes rte-lh-appear {
+  from { opacity: 0; transform: translateY(-4px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* ── Section ──────────────────────────────────────────────────────── */
+.rte-lh-section {
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rte-lh-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--rte-placeholder);
+  padding-bottom: 1px;
+}
+
+/* ── Thin horizontal divider between sections ─────────────────────── */
+.rte-lh-divider {
+  height: 1px;
+  background: var(--rte-toolbar-border);
+  margin: 4px 0;
+}
+
+/* ── Preset pill row ──────────────────────────────────────────────── */
+.rte-lh-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.rte-lh-pill {
+  /* Reset */
+  border: none;
+  cursor: pointer;
+  font-family: var(--rte-font);
+
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+
+  background: var(--rte-btn-hover);
+  color: var(--rte-btn-color);
+
+  transition: background .1s ease, color .1s ease;
+  white-space: nowrap;
+}
+
+.rte-lh-pill:hover {
+  background: color-mix(in srgb, var(--rte-border-focus) 15%, transparent);
+  color: var(--rte-border-focus);
+}
+
+/* Active / selected pill */
+.rte-lh-pill.rte-lh-pill-active {
+  background: var(--rte-btn-active-bg);
+  color: var(--rte-btn-active-fg);
+}
+
+/* ── Custom slider row ────────────────────────────────────────────── */
+.rte-lh-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rte-lh-slider-label {
+  font-size: 11.5px;
+  color: var(--rte-placeholder);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 42px;
+}
+
+.rte-lh-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--rte-border);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--rte-border-focus);
+}
+
+/* Thumb */
+.rte-lh-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rte-border-focus);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: box-shadow .12s ease;
+}
+.rte-lh-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--rte-border-focus);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  cursor: pointer;
+}
+.rte-lh-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rte-border-focus) 30%, transparent);
+}
+
+/* Live value badge "1.5×" / "12px" */
+.rte-lh-slider-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--rte-btn-active-fg);
+  background: var(--rte-btn-active-bg);
+  border-radius: 4px;
+  padding: 1px 6px;
+  min-width: 38px;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Reset button ─────────────────────────────────────────────────── */
+.rte-lh-reset {
+  /* Reset */
+  border: none;
+  cursor: pointer;
+  font-family: var(--rte-font);
+
+  align-self: flex-start;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--rte-placeholder);
+  background: transparent;
+  transition: color .1s ease, background .1s ease;
+}
+
+.rte-lh-reset:hover {
+  color: var(--rte-text);
+  background: var(--rte-btn-hover);
+}
+
+/* ── Dark-theme overrides ─────────────────────────────────────────── */
+/* All colours already come from CSS variables, so dark mode is
+   handled automatically by the editor's [data-theme="dark"] on the
+   root element.  No extra overrides needed.                         */
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .rte-lh-menu {
+    width: calc(100vw - 24px);
+    max-width: 280px;
+  }
+  .rte-lh-label {
+    display: none;        /* hide the readout on very small screens */
+  }
+  .rte-lh-btn {
+    padding: 0 5px !important;
+  }
+}

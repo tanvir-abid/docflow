@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocFlow Editor — Live Demo</title>
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<!-- Editor styles -->
+<link rel="stylesheet" href="src/editor.css">
+
+<style>
+  body { background-color: #0f0f1a; }
+  .navbar-brand i { color: #7c9eff; }
+  #my-editor { min-height: 220px; }
+  .tool-badge { font-size: .72rem; }
+  .accordion-button:not(.collapsed) { color: #7c9eff; background-color: rgba(124,158,255,.08); }
+  .accordion-button:focus { box-shadow: none; }
+  kbd { font-size: .72rem; }
+  #html-output { max-height: 220px; overflow: auto; }
+  .sticky-lg-top { top: 1rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand navbar-dark border-bottom border-secondary-subtle mb-4">
+  <div class="container">
+    <span class="navbar-brand fw-semibold d-flex align-items-center gap-2 mb-0">
+      <i class="fa-solid fa-file-pen"></i> DocFlow
+    </span>
+    <span class="badge text-bg-primary-subtle text-primary-emphasis border border-primary-subtle small">
+      <i class="fa-solid fa-flask-vial me-1"></i>Live demo
+    </span>
+  </div>
+</nav>
+
+<div class="container pb-5">
+
+  <div class="row mb-4">
+    <div class="col-lg-8">
+      <h1 class="h3 fw-bold mb-1">A lightweight rich-text editor for your page</h1>
+      <p class="text-secondary small mb-0">
+        Everything below is fully interactive. Type in the content area, select text to see the
+        floating toolbar, and try the tools in the main toolbar. Changes are logged to the browser
+        console on every keystroke, and you can inspect the live HTML output at the bottom.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Editor column -->
+    <div class="col-lg-8">
+      <div class="card bg-body-tertiary border-secondary-subtle shadow-sm">
+        <div class="card-body p-2 p-sm-3">
+          <div id="toolbar-slot" class="mb-2"></div>
+          <div id="my-editor"></div>
+        </div>
+        <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 small text-secondary">
+          <span><i class="fa-regular fa-circle-check me-1"></i>Autosaving to console</span>
+          <div class="d-flex flex-wrap gap-2">
+            <button id="insert-sample-btn" class="btn btn-sm btn-primary" type="button">
+              <i class="fa-solid fa-file-lines me-1"></i>Insert sample content
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#html-output-wrap">
+              <i class="fa-solid fa-code me-1"></i>View HTML output
+            </button>
+          </div>
+        </div>
+        <div class="collapse" id="html-output-wrap">
+          <div class="card-body border-top border-secondary-subtle pt-2">
+            <pre id="html-output" class="bg-black bg-opacity-50 rounded p-2 small mb-0"><code>&lt;!-- start typing to see markup --&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-primary-subtle border-primary-subtle small mt-3 mb-0 d-flex gap-2">
+        <i class="fa-solid fa-circle-info mt-1"></i>
+        <div>
+          <strong>Not sure where to start?</strong> Click <em>Insert sample content</em> above to
+          drop in a formatted document with headings, lists, a table, a quote, and more — a quick
+          way to see how the toolbar's tools behave on real content.
+        </div>
+      </div>
+    </div>
+
+    <!-- Guide column -->
+    <div class="col-lg-4">
+      <div class="sticky-lg-top">
+
+        <div class="card bg-body-tertiary border-secondary-subtle shadow-sm mb-3">
+          <div class="card-header py-2">
+            <span class="small fw-semibold"><i class="fa-solid fa-toolbox me-2"></i>Toolbar guide</span>
+          </div>
+          <div class="accordion accordion-flush" id="toolGuide">
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#g-utility">
+                  <i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Utility
+                </button>
+              </h2>
+              <div id="g-utility" class="accordion-collapse collapse" data-bs-parent="#toolGuide">
+                <div class="accordion-body py-2">
+                  <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+                    <li><i class="fa-solid fa-rotate-left fa-fw me-1 text-secondary"></i>Undo / redo history</li>
+                    <li><i class="fa-solid fa-eraser fa-fw me-1 text-secondary"></i>Clear formatting on selection</li>
+                    <li><i class="fa-solid fa-magnifying-glass fa-fw me-1 text-secondary"></i>Find &amp; replace text</li>
+                    <li><i class="fa-solid fa-paste fa-fw me-1 text-secondary"></i>Copy / paste as plain text</li>
+                    <li><i class="fa-solid fa-a fa-fw me-1 text-secondary"></i>Drop cap for the first letter</li>
+                    <li><i class="fa-solid fa-ruler-combined fa-fw me-1 text-secondary"></i>Page margin presets</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#g-text">
+                  <i class="fa-solid fa-font fa-fw me-2"></i>Text formatting
+                </button>
+              </h2>
+              <div id="g-text" class="accordion-collapse collapse" data-bs-parent="#toolGuide">
+                <div class="accordion-body py-2">
+                  <div class="d-flex flex-wrap gap-1">
+                    <span class="badge text-bg-secondary tool-badge">Bold</span>
+                    <span class="badge text-bg-secondary tool-badge">Italic</span>
+                    <span class="badge text-bg-secondary tool-badge">Underline</span>
+                    <span class="badge text-bg-secondary tool-badge">Strikethrough</span>
+                    <span class="badge text-bg-secondary tool-badge">Inline code</span>
+                    <span class="badge text-bg-secondary tool-badge">Text color</span>
+                    <span class="badge text-bg-secondary tool-badge">Highlight</span>
+                    <span class="badge text-bg-secondary tool-badge">Background color</span>
+                    <span class="badge text-bg-secondary tool-badge">Font size</span>
+                    <span class="badge text-bg-secondary tool-badge">Font family</span>
+                    <span class="badge text-bg-secondary tool-badge">Superscript / subscript</span>
+                    <span class="badge text-bg-secondary tool-badge">Line height</span>
+                    <span class="badge text-bg-secondary tool-badge">Indent</span>
+                    <span class="badge text-bg-secondary tool-badge">UPPER / lower case</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#g-paragraph">
+                  <i class="fa-solid fa-paragraph fa-fw me-2"></i>Paragraph
+                </button>
+              </h2>
+              <div id="g-paragraph" class="accordion-collapse collapse" data-bs-parent="#toolGuide">
+                <div class="accordion-body py-2">
+                  <div class="d-flex flex-wrap gap-1">
+                    <span class="badge text-bg-secondary tool-badge">Heading levels</span>
+                    <span class="badge text-bg-secondary tool-badge">Blockquote</span>
+                    <span class="badge text-bg-secondary tool-badge">Alignment</span>
+                    <span class="badge text-bg-secondary tool-badge">Ordered list</span>
+                    <span class="badge text-bg-secondary tool-badge">Bulleted list</span>
+                    <span class="badge text-bg-secondary tool-badge">Checklist</span>
+                    <span class="badge text-bg-secondary tool-badge">Columns</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#g-insert">
+                  <i class="fa-solid fa-plus fa-fw me-2"></i>Insert
+                </button>
+              </h2>
+              <div id="g-insert" class="accordion-collapse collapse" data-bs-parent="#toolGuide">
+                <div class="accordion-body py-2">
+                  <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+                    <li><i class="fa-solid fa-link fa-fw me-1 text-secondary"></i>Hyperlinks</li>
+                    <li><i class="fa-solid fa-ruler-horizontal fa-fw me-1 text-secondary"></i>Horizontal rule</li>
+                    <li><i class="fa-solid fa-terminal fa-fw me-1 text-secondary"></i>Code block</li>
+                    <li><i class="fa-solid fa-table fa-fw me-1 text-secondary"></i>Table, with drag-to-select and resizing</li>
+                    <li><i class="fa-regular fa-image fa-fw me-1 text-secondary"></i>Image upload</li>
+                    <li><i class="fa-solid fa-at fa-fw me-1 text-secondary"></i>Special characters</li>
+                    <li><i class="fa-regular fa-face-smile fa-fw me-1 text-secondary"></i>Emoji picker</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card bg-body-tertiary border-secondary-subtle shadow-sm">
+          <div class="card-header py-2">
+            <span class="small fw-semibold"><i class="fa-solid fa-keyboard me-2"></i>Keyboard shortcuts</span>
+          </div>
+          <div class="card-body py-2">
+            <table class="table table-sm table-borderless small mb-0">
+              <tbody>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>B</kbd></td><td class="text-secondary">Bold</td></tr>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>I</kbd></td><td class="text-secondary">Italic</td></tr>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>U</kbd></td><td class="text-secondary">Underline</td></tr>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>K</kbd></td><td class="text-secondary">Insert link</td></tr>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td class="text-secondary">Undo</td></tr>
+                <tr><td><kbd>`</kbd></td><td class="text-secondary">Inline code</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <p class="text-center text-secondary small mt-5 mb-0">
+    Word count and autosave status appear in the status bar beneath the editor.
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+import { DocFlowEditor } from './src/docflow.js';
+
+// Sample document used by the "Insert sample content" button — touches every
+// element type the toolbar can produce, so it's a quick way to try the tools
+// out on real content instead of starting from a blank page.
+const SAMPLE_CONTENT = `
+  <h1>DocFlow</h1>
+  <p>DocFlow is a lightweight, dependency-free rich-text editor you can drop into any page. This sample document exercises the different element types the toolbar can produce — <strong>bold</strong>, <em>italic</em>, <u>underlined</u>, and <code>inline code</code> text among them.</p>
+
+  <h2>Getting started</h2>
+  <p>Mount the editor against one element for a single combined toolbar-and-content block, or against two separate elements — a toolbar slot and a content slot — for a split layout like the one on this page.</p>
+
+  <h3>Core formatting tools</h3>
+  <p>The toolbar covers the essentials you'd expect from a word processor, plus a few extras: font family and size, text and background color, highlighting, line height, letter spacing, and text case transforms.</p>
+
+  <h4>Paragraph-level tools</h4>
+  <ul>
+    <li>Headings, from Heading 1 down to Heading 6</li>
+    <li>Blockquotes for calling out a passage</li>
+    <li>Left, center, right, and justified alignment</li>
+    <li>Bulleted, numbered, and checklist lists</li>
+    <li>Multi-column layouts</li>
+  </ul>
+
+  <blockquote>A good editor gets out of the way — it should feel like writing, not like operating software.</blockquote>
+
+  <h3>Working with structured content</h3>
+  <p>Numbered steps are just as easy to produce as bullet points:</p>
+  <ol>
+    <li>Select the tools you want from the built-in registry</li>
+    <li>Construct a new <code>DocFlowEditor</code> with your target element(s)</li>
+    <li>Listen for the <code>onChange</code> callback to persist content</li>
+  </ol>
+
+  <h3>Tables</h3>
+  <p>Tables support drag-to-select and resizing:</p>
+  <table data-rte-table>
+    <tbody>
+      <tr><th>Tool</th><th>Group</th><th>Shortcut</th></tr>
+      <tr><td>Bold</td><td>Text formatting</td><td>Ctrl+B</td></tr>
+      <tr><td>Italic</td><td>Text formatting</td><td>Ctrl+I</td></tr>
+      <tr><td>Link</td><td>Insert</td><td>Ctrl+K</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Everything else</h3>
+  <p>There's also support for <a href="#">hyperlinks</a>, horizontal rules, code blocks, images, special characters, and emoji 🎉. A horizontal rule looks like this:</p>
+  <hr>
+  <p>Try selecting any of the text above and using the floating selection toolbar, or clear this content and start writing your own document.</p>
+`.trim();
+
+const htmlOutputEl = document.querySelector('#html-output code');
+
+const editor = new DocFlowEditor(
+  { toolbar: '#toolbar-slot', content: '#my-editor' },
+  {
+    tools: null,
+    placeholder: 'Write your document…',
+    minHeight: 120,
+    theme: 'auto',
+    showStatusBar: true,
+    initialContent: '',
+    onChange: (html) => {
+      console.log('autosave payload:', editor.getText());
+      htmlOutputEl.textContent = html || '<!-- start typing to see markup -->';
+    },
+  }
+);
+
+document.querySelector('#insert-sample-btn').addEventListener('click', () => {
+  editor.setHTML(SAMPLE_CONTENT);
+  editor.focus();
+  editor.emitChange(); // setHTML() doesn't fire onChange on its own — trigger it manually
+});
+</script>
+
+</body>
+</html>
